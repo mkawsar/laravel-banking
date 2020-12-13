@@ -130,7 +130,6 @@
                         this.loader = true;
                         axios.post(this.$env.BACKEND_API + 'auth/login', this.user)
                             .then((response) => {
-                                console.log(response);
                                 Object.keys(response.data).forEach((key) => {
                                     this.$localStorage.set(key, response.data[key]);
                                     if (key === 'user') {

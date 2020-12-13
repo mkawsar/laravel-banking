@@ -8,6 +8,7 @@ import profileRoute from '~/router/Profile/Home';
 
 /*----------- SysAdmin -----------*/
 import homeRouteSysAdmin from '~/router/SysAdmin/Home';
+import UsersRoute from '~/router/SysAdmin/Users';
 
 const baseRoutes = [
     {
@@ -27,6 +28,7 @@ const baseRoutes = [
 const routes = baseRoutes.concat(
     profileRoute,
     homeRouteSysAdmin,
+    UsersRoute,
 );
 
 export default routes;
