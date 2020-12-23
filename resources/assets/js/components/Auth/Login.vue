@@ -62,7 +62,7 @@
 
                 <app-footer></app-footer>
 
-                <div class="full-page-background"
+                <div class="full-page-background bg-image"
                      style="background-image: url(storage/static/img/background/background-1.jpg)">
 
                 </div>
@@ -128,7 +128,7 @@
                 this.$validator.validateAll().then(isValid => {
                     if (isValid) {
                         this.loader = true;
-                        axios.post(this.$env.BACKEND_API + 'login', this.user)
+                        axios.post(this.$env.BACKEND_API + 'auth/login', this.user)
                             .then((response) => {
                                 Object.keys(response.data).forEach((key) => {
                                     this.$localStorage.set(key, response.data[key]);

@@ -4,7 +4,7 @@
          :data-active-color="activeColor">
         <div class="logo">
             <a class="simple-text logo-mini"
-               href="https://www.creative-tim.com/product/vue-paper-dashboard-pro">
+               href="javascript:void(0)">
                 <div class="logo-img">
                     <img :src="logo" alt="">
                 </div>
@@ -39,7 +39,7 @@
         props: {
             title: {
                 type: String,
-                default: 'Amar Diet'
+                default: 'Banking'
             },
             type: {
                 type: String,

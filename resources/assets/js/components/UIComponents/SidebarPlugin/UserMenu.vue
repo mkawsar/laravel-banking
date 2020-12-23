@@ -73,8 +73,16 @@
                 this.isClosed = !this.isClosed
             },
             logoutUser() {
-                this.$localStorage.clear();
-                this.$router.push({name: 'login'});
+                axios.get(this.$env.BACKEND_API + 'auth/user/logout')
+                .then(res => {
+                    if (res) {
+                        this.$localStorage.clear();
+                        this.$router.push({name: 'login'});
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                })
             },
             profileEditPage() {
                 this.$router.push({name: 'ProfileEdit'});
@@ -88,7 +96,7 @@
         },
         mounted() {
             this.$store.commit('setUser', this.$localStorage.get('user'));
-            this.avatar = this.$store.state.user.profile_picture;
+            this.avatar = this.$store.state.user.picture;
             EventBus.$on('UPDATE_AUTH_USER_PROFILE', () => {
                 axios.get(this.$env.BACKEND_API + 'auth/profile')
                     .then(res => {

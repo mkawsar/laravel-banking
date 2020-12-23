@@ -19,28 +19,62 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $validator->errors()->first();
+            return response()->json([
+                'message' => $validator->errors()->first(),
+                'type' => 'validation'
+            ], 400);
         }
 
         // Find user in database
-        $user = User::where('email', strtolower($request->input('email')))->first();
+        $user = User::with('role')->where('email', strtolower($request->input('email')))->first();
 
         if (empty($user)) {
-            return 'not found';
+            return response()->json([
+                'message' => 'User not found',
+                'type' => 'failed'
+            ], 404);
         }
 
         // Check password
         if (!Hash::check($request->input('password'), $user->password)) {
-            return 'Your password isn\'t valid';
+            return response()->json([
+                'message' => 'Your password isn\'t valid',
+                'type' => 'failed'
+            ], 400);
         }
 
         // Generate token
-        $token = $user->createToken('banking')->accessToken;
+        $token = $user->createToken(config('constant.app.name'))->accessToken;
+
+        if ($user->picture === null) {
+            $user->picture = config('constant.app.url') . 'storage/static/img/avatar.png';
+        }
 
         return response()->json([
             'message' => 'Successfully logged in',
             'user' => $user,
             'token' => $token
         ]);
+    }
+
+    public function details()
+    {
+        $user = User::with('role')->find(Auth::user()->id);
+        if (empty($user)) {
+            return response()->json([
+                'message' => 'User not found',
+                'type' => 'failed'
+            ], 404);
+        }
+        return $user;
+    }
+
+    public function logout()
+    {
+        Auth::user()->token()->revoke();
+
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ], 200);
     }
 }
