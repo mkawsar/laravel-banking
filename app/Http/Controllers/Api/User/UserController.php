@@ -12,7 +12,7 @@ class UserController extends Controller
     public function index()
     {
         return User::with('role')
-            ->where('role_id', '=', 1)
+            ->where('role_id', '!=', 1)
             ->paginate(10);
     }
 
@@ -45,6 +45,58 @@ class UserController extends Controller
                 'message' => 'Failed to create user by admin.',
                 'status' => 'failed'
             ]);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $queryString = strtolower($request->search);
+        $users = User::with('role')
+            ->whereRaw('lower(name) like (?)', ["%{$queryString}%"])
+            ->where('role_id', '!=', 1)
+            ->paginate(10);
+        return $users;
+    }
+
+    public function details($userID)
+    {
+        return User::with('role')->find($userID);
+    }
+
+    public function update(Request $request, $userId)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'role_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response(['message' => $validator->errors()->first(), 'status' => 'validation']);
+        }
+
+        $payload = [
+            'name' => $request->name,
+            'role_id' => $request->role_id
+        ];
+
+        if (User::where('id', '=', $userId)->update($payload)) {
+            return response([
+                'message' => 'User edited successfully by admin.',
+                'status' => 'success'
+            ]);
+        } else {
+            return response([
+                'message' => 'Failed to edit user by admin.',
+                'status' => 'failed'
+            ]);
+        }
+    }
+
+    public function destroy($userId)
+    {
+        if (User::where('id', '=', $userId)->delete()) {
+            return response(['message' => 'User deleted successfully by admin.', 'status' => 'success']);
+        } else {
+            return response(['message' => 'Failed to delete user by admin.', 'status' => 'failed']);
         }
     }
 }
