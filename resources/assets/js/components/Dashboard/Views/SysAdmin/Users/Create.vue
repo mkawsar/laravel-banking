@@ -205,6 +205,7 @@ export default {
                             } else if (res.data.status === 'success') {
                                 this.$notification.notify(this, 'Success', res.data.message);
                                 this.$router.push({name: 'UserList'});
+                                this.reset();
                             } else {
                                 this.$notification.error(this, 'Error', 'Somethings went wrong');
                             }
