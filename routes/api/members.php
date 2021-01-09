@@ -9,4 +9,5 @@ Route::group([
     'roles' => ['admin', 'user', 'operator']
 ], function () {
     Route::get('list', 'MembersController@index');
+    Route::post('create', 'MembersController@create');
 });
