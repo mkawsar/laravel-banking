@@ -8,7 +8,7 @@
                 <li class="breadcrumb-item">
                     <router-link :to="{name: 'MemberList'}">Member List</router-link>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">Create</li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
             </ol>
         </nav>
         <div class="col-md-12">
@@ -25,13 +25,9 @@
                             <input type="text"
                                    name="member_id"
                                    id="member_id"
-                                   v-validate="memberValidations.member_id"
                                    v-model="member.member_id"
                                    placeholder="0001/0096"
-                                   class="form-control">
-                            <span class="text-danger" v-show="errors.has('member_id')">{{
-                                    errors.first('member_id')
-                                }}</span>
+                                   class="form-control" readonly="readonly">
                         </div>
                         <div class="form-group required">
                             <label for="name" class="control-label">Name</label>
@@ -220,17 +216,13 @@
                                    ref="picture"
                                    @change="handleFileOnChange"
                                    accept="image/*"
-                                   v-validate="memberValidations.picture"
                                    class="form-control">
-                            <span class="text-danger" v-show="errors.has('picture')">{{
-                                    errors.first('picture')
-                                }}</span>
                         </div>
 
                     </div>
                     <div class="card-footer">
-                        <button type="submit" @click.prevent="handleCreateNewMember"
-                                class="btn btn-outline btn-info btn-wd">Create Member
+                        <button type="submit" @click.prevent="handleUpdateMemberInformation"
+                                class="btn btn-outline btn-info btn-wd">Update Member
                         </button>
                         <button type="submit" @click.prevent="cancel"
                                 class="btn btn-outline btn-danger btn-wd"
@@ -416,7 +408,7 @@ export default {
             this.member.picture = '';
         },
 
-        handleCreateNewMember() {
+        handleUpdateMemberInformation() {
             this.disabled = true;
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
@@ -439,13 +431,11 @@ export default {
                     formData.append('nominee_address', this.member.nominee_address);
                     formData.append('picture', this.member.picture);
 
-                    axios.post(this.$env.BACKEND_API + 'admin/member/create', formData)
+                    axios.post(this.$env.BACKEND_API + `admin/member/${this.$route.params.memberID}/update`, formData)
                         .then(res => {
                             if (res.data.status === 'validation' || res.data.status === 'failed') {
-                                console.log(res.data)
                                 this.$notification.error(this, 'Error', res.data.message);
                             } else if (res.data.status === 'success') {
-                                console.log('test')
                                 this.$notification.notify(this, 'Success', res.data.message);
                                 this.$router.push({name: 'MemberList'});
                                 this.reset();
@@ -469,10 +459,37 @@ export default {
         },
         handleFileOnChange() {
             this.member.picture = this.$refs.picture.files[0];
+        },
+        handleGetMemberDetails(memberID) {
+            axios.get(this.$env.BACKEND_API + `admin/member/${memberID}/details`)
+                .then(res => {
+                    if (res) {
+                        this.member.member_id = res.data.member_id;
+                        this.member.name = res.data.name;
+                        this.member.father_name = res.data.father_name;
+                        this.member.mother_name = res.data.mother_name;
+                        this.member.present_address = res.data.present_address;
+                        this.member.permanent_address = res.data.permanent_address;
+                        this.member.nid = res.data.nid;
+                        this.member.phone = res.data.phone;
+                        this.member.nationality = res.data.nationality;
+                        this.member.dob = res.data.dob;
+                        this.member.education_qualification = res.data.education_qualification;
+                        this.member.nominee_name = res.data.nominee_name;
+                        this.member.nominee_relation = res.data.nominee_relation;
+                        this.member.nominee_father_name = res.data.nominee_father_name;
+                        this.member.nominee_mother_name = res.data.nominee_mother_name;
+                        this.member.nominee_address = res.data.nominee_address;
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                })
         }
     },
     mounted() {
         this.year = this.$moment().year();
+        this.handleGetMemberDetails(this.$route.params.memberID);
     }
 }
 </script>

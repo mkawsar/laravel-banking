@@ -18,6 +18,59 @@
             </div>
             <div class="card-content row">
                 <div class="col-sm-12">
+                    <template>
+                        <div class="filter-bar" style="margin-bottom: 10px">
+                            <form class="form-inline">
+                                <label>Search for:</label>
+                                <input type="text"
+                                       v-model="filterText"
+                                       class="form-control"
+                                       placeholder="Name">
+                                <button class="btn btn-primary btn-sm">Go</button>
+                                <button class="btn btn-default btn-sm">Reset</button>
+                            </form>
+                        </div>
+                        <vuetable ref="vuetable"
+                                  :api-url="url"
+                                  :http-options="headerOptions"
+                                  :fields="tableRowsFields"
+                                  pagination-path=""
+                                  :css="css.table"
+                                  @vuetable:loading="showLoader"
+                                  @vuetable:loaded="hideLoader"
+                                  @vuetable:pagination-data="onPaginationData"
+                        >
+                            <template slot="actions" slot-scope="props">
+                                <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
+                                        v-tooltip="{
+                                            content: 'Delete this user',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                    <i class="ti-close"></i>
+                                </button>
+                                <router-link :to="{name: 'MemberEdit', params: { memberID: props.rowData.id }}"
+                                             class="btn btn-simple btn-xs btn-success btn-icon"
+                                             v-tooltip="{
+                                            content: 'Edit this user',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                    <i class="ti-pencil"></i>
+                                </router-link>
+                            </template>
+                        </vuetable>
+                        <div class="vuetable-pagination ui basic segment grid">
+                            <vuetable-pagination-info ref="paginationInfo">
+                            </vuetable-pagination-info>
+
+                            <vuetable-pagination ref="pagination" :css="css.pagination"
+                                                 @vuetable-pagination:change-page="onChangePage"
+                            ></vuetable-pagination>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -25,16 +78,84 @@
 </template>
 
 <script>
+import Vue from 'vue';
+import Vuetable from "vuetable-2/src/components/Vuetable";
+import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
+import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
+import VuetableCssConfig from "~/plugins/VuetableCssConfig";
+
+import {MessageBox} from 'element-ui';
+
+Vue.prototype.$confirm = MessageBox.confirm;
+
 export default {
     name: "List",
-    mounted() {
-        axios.get(this.$env.BACKEND_API + 'admin/member/list')
-            .then(res => {
-                console.log(res)
-            })
-            .catch(err => {
-                console.log(err)
-            })
+    data() {
+        return {
+            url: this.$env.BACKEND_API + 'admin/member/list',
+            css: VuetableCssConfig,
+            filterText: '',
+            moreParams: {},
+            tableRowsFields: [
+                {
+                    name: 'member_id',
+                    title: 'Member ID'
+                },
+                {
+                    name: 'name',
+                    title: 'Name'
+                },
+                {
+                    name: 'phone',
+                    title: 'Mobile'
+                },
+                {
+                    name: 'father_name',
+                    title: 'Father Name'
+                },
+                {
+                    name: 'nominee_name',
+                    title: 'Nominee Name'
+                },
+                {
+                    name: '__slot:actions',
+                    title: 'Actions',
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
+                }
+            ],
+            headerOptions: {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}},
+        }
+    },
+    components: {
+        Vuetable,
+        VuetablePagination,
+        VuetablePaginationInfo,
+    },
+    methods: {
+        onPaginationData(paginationData) {
+            this.$refs.pagination.setPaginationData(paginationData);
+            this.$refs.paginationInfo.setPaginationData(paginationData)
+        },
+        onChangePage(page) {
+            this.$refs.vuetable.changePage(page)
+        },
+        showLoader() {
+            this.loading = true;
+        },
+        hideLoader() {
+            this.loading = false;
+        },
+        onFilterSet(filterText) {
+            this.moreParams = {
+                'filter': filterText
+            };
+            Vue.nextTick(() => this.$refs.vuetable.refresh())
+        },
+        onFilterReset() {
+            this.moreParams = {};
+            Vue.nextTick(() => this.$refs.vuetable.refresh())
+        },
     }
 }
 </script>

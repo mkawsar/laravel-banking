@@ -10,4 +10,6 @@ Route::group([
 ], function () {
     Route::get('list', 'MembersController@index');
     Route::post('create', 'MembersController@create');
+    Route::get('{memberID}/details', 'MembersController@show');
+    Route::post('{memberID}/update', 'MembersController@update');
 });
