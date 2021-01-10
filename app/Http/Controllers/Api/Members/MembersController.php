@@ -15,13 +15,21 @@ class MembersController extends Controller
 {
     public function index()
     {
-        return 'test';
+        return Member::with('creator')->paginate(10);
     }
 
     public function create(Request $request)
     {
+        $memberID = '00' . Carbon::now()->year . $request->member_id;
+        $validationMember = Member::where('member_id', '=', $memberID)->first();
+        if (!empty($validationMember)) {
+            return response([
+                'message' => 'This member already exist',
+                'status' => 'validation'
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
-            'member_id' => 'required|unique:members,member_id',
             'name' => 'required',
             'father_name' => 'required',
             'mother_name' => 'required',
@@ -40,7 +48,10 @@ class MembersController extends Controller
         $uuid = Uuid::uuid4()->toString();
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first(), 'type' => 'validation'], 400);
+            return response([
+                'message' => $validator->errors()->first(),
+                'status' => 'validation'
+            ]);
         }
 
         $imageName = '';
@@ -60,7 +71,7 @@ class MembersController extends Controller
 
         $member = new Member();
         $member->id = $uuid;
-        $member->member_id = '00' . Carbon::now()->year . $request->member_id;
+        $member->member_id = $memberID;
         $member->name = $request->name;
         $member->father_name = $request->father_name;
         $member->mother_name = $request->mother_name;

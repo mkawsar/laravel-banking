@@ -397,7 +397,23 @@ export default {
             this.$router.push({name: 'MemberList'});
         },
         reset() {
-            this.member = {};
+            this.member.member_id = '';
+            this.member.name = '';
+            this.member.father_name = '';
+            this.member.mother_name = '';
+            this.member.present_address = '';
+            this.member.permanent_address = '';
+            this.member.nid = '';
+            this.member.phone = '';
+            this.member.nationality = '';
+            this.member.dob = '';
+            this.member.education_qualification = '';
+            this.member.nominee_name = '';
+            this.member.nominee_relation = '';
+            this.member.nominee_father_name = '';
+            this.member.nominee_mother_name = '';
+            this.member.nominee_address = '';
+            this.member.picture = '';
         },
 
         handleCreateNewUser() {
@@ -414,7 +430,7 @@ export default {
                     formData.append('nid', this.member.nid);
                     formData.append('phone', this.member.phone);
                     formData.append('nationality', this.member.nationality);
-                    formData.append('dob', this.member.dob);
+                    formData.append('dob', this.$moment(this.member.dob).format('DD/MM/YYYY'));
                     formData.append('education_qualification', this.member.education_qualification);
                     formData.append('nominee_name', this.member.nominee_name);
                     formData.append('nominee_relation', this.member.nominee_relation);
@@ -426,16 +442,16 @@ export default {
                     axios.post(this.$env.BACKEND_API + 'admin/member/create', formData)
                         .then(res => {
                             if (res.data.status === 'validation' || res.data.status === 'failed') {
-                                this.$notification.error(this, 'Error', res.data.message);
-                            } else if (res.data.status == 'success') {
                                 console.log(res.data)
+                                this.$notification.error(this, 'Error', res.data.message);
+                            } else if (res.data.status === 'success') {
+                                console.log('test')
                                 this.$notification.notify(this, 'Success', res.data.message);
                                 this.$router.push({name: 'MemberList'});
                                 this.reset();
                             } else {
                                 this.$notification.error(this, 'Error', 'Somethings went wrong');
                             }
-                            //this.disabled = false;
                         })
                         .catch(err => {
                             this.$notification.notifyError(this, err.response.data);

@@ -12,4 +12,9 @@ class Member extends Model
 
     protected $table = 'members';
     public $incrementing = false;
+
+    public function creator()
+    {
+        return $this->hasOne('App\Models\User', 'id', 'creator_id');
+    }
 }

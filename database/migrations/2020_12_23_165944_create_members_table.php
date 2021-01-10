@@ -17,7 +17,7 @@ class CreateMembersTable extends Migration
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Schema::create('members', function (Blueprint $table) {
             $table->string('id', '36')->primary();
-            $table->integer('member_id')->unique()->index();
+            $table->string('member_id', '30')->unique();
             $table->string('name', '255')->nullable();
             $table->string('father_name', '255')->nullable();
             $table->string('mother_name', '255')->nullable();

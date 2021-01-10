@@ -26,7 +26,16 @@
 
 <script>
 export default {
-    name: "List"
+    name: "List",
+    mounted() {
+        axios.get(this.$env.BACKEND_API + 'admin/member/list')
+            .then(res => {
+                console.log(res)
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
 }
 </script>
 
