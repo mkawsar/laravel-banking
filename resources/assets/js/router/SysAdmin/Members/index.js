@@ -2,6 +2,7 @@ const DashboardLayout = () => import('~/components/Dashboard/Layout/DashboardLay
 const MemberList = () => import('~/components/Dashboard/Views/SysAdmin/Members/List');
 const MemberCreate = () => import('~/components/Dashboard/Views/SysAdmin/Members/Create');
 const MemberEdit = () => import('~/components/Dashboard/Views/SysAdmin/Members/Edit');
+const MemberDetails = () => import('~/components/Dashboard/Views/SysAdmin/Members/Details');
 
 export default [
     {
@@ -26,6 +27,12 @@ export default [
                 name: 'MemberEdit',
                 component: MemberEdit,
                 meta: {title: 'Member Edit', requireAuth: true, roles: ['Admin', 'User']}
+            },
+            {
+                path: 'list/:memberID/details',
+                name: 'MemberDetails',
+                component: MemberDetails,
+                meta: {title: 'Member Details', requireAuth: true, roles: ['Admin', 'User']}
             },
         ]
     }

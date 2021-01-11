@@ -12,4 +12,6 @@ Route::group([
     Route::post('create', 'MembersController@create');
     Route::get('{memberID}/details', 'MembersController@show');
     Route::post('{memberID}/update', 'MembersController@update');
+    Route::get('search', 'MembersController@search');
+    Route::delete('{memberID}/delete', 'MembersController@destroy');
 });

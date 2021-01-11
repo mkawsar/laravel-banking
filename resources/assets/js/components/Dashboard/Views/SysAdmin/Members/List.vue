@@ -25,9 +25,10 @@
                                 <input type="text"
                                        v-model="filterText"
                                        class="form-control"
-                                       placeholder="Name">
-                                <button class="btn btn-primary btn-sm">Go</button>
-                                <button class="btn btn-default btn-sm">Reset</button>
+                                       @keyup.enter.prevent="doFilter(filterText)"
+                                       placeholder="Name or Member ID">
+                                <button class="btn btn-primary btn-sm" @click.prevent="doFilter(filterText)">Go</button>
+                                <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
                             </form>
                         </div>
                         <vuetable ref="vuetable"
@@ -40,10 +41,14 @@
                                   @vuetable:loaded="hideLoader"
                                   @vuetable:pagination-data="onPaginationData"
                         >
+                            <template slot="picture" slot-scope="props">
+                                <img :src="props.rowData.picture" alt="" style="width: 50px; height: 50px;">
+                            </template>
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
+                                        @click.prevent="handleMemberDelete(props.rowData.name, props.rowData.id)"
                                         v-tooltip="{
-                                            content: 'Delete this user',
+                                            content: 'Delete this member',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
@@ -53,12 +58,22 @@
                                 <router-link :to="{name: 'MemberEdit', params: { memberID: props.rowData.id }}"
                                              class="btn btn-simple btn-xs btn-success btn-icon"
                                              v-tooltip="{
-                                            content: 'Edit this user',
+                                            content: 'Edit this member',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
                                             offset: 10,}">
                                     <i class="ti-pencil"></i>
+                                </router-link>
+                                <router-link :to="{name: 'MemberDetails', params: { memberID: props.rowData.id }}"
+                                             class="btn btn-simple btn-xs btn-warning btn-icon"
+                                             v-tooltip="{
+                                            content: 'Details this member',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                    <i class="ti-eye"></i>
                                 </router-link>
                             </template>
                         </vuetable>
@@ -118,6 +133,12 @@ export default {
                     title: 'Nominee Name'
                 },
                 {
+                    name: '__slot:picture',
+                    title: 'Picture',
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
+                },
+                {
                     name: '__slot:actions',
                     title: 'Actions',
                     titleClass: 'text-center',
@@ -156,6 +177,42 @@ export default {
             this.moreParams = {};
             Vue.nextTick(() => this.$refs.vuetable.refresh())
         },
+        doFilter() {
+            if (this.filterText === '') {
+                this.url = this.$env.BACKEND_API + 'admin/member/list';
+            } else {
+                this.url = this.$env.BACKEND_API + `admin/member/search?search=${this.filterText}`;
+            }
+        },
+        resetFilter() {
+            this.filterText = '';
+            this.url = this.$env.BACKEND_API + 'admin/member/list'
+        },
+        handleMemberDelete(name, memberID) {
+            this.$confirm('This will delete the user "' + name + '". Continue?', 'Warning', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel',
+                type: 'warning'
+            }).then(() => {
+                axios.delete(this.$env.BACKEND_API + `admin/member/${memberID}/delete`)
+                    .then(res => {
+                        if (res.data.status === 'failed') {
+                            this.$notification.error(this, 'Error', res.data.message);
+                        } else if (res.data.status === 'success') {
+                            this.$notification.notify(this, 'Success', res.data.message);
+                            this.$refs.vuetable.refresh();
+                        } else {
+                            this.$notification.error(this, 'Error', 'Somethings went wrong');
+                        }
+                    })
+                    .catch(err => {
+                        this.$notification.error(this, 'Error', err.response.data);
+                    })
+            })
+                .catch(() => {
+                    //this.$notification.error(this, 'Error', 'Somethings went wrong');
+                })
+        }
     }
 }
 </script>

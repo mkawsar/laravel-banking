@@ -15,7 +15,15 @@ class MembersController extends Controller
 {
     public function index()
     {
-        return Member::with('creator')->paginate(10);
+        $members = Member::with('creator')->paginate(10);
+
+        foreach ($members as $member) {
+             if ($member->picture != null) {
+                 $member->picture = config('constant.app.url') . 'images/members/thumb/thumb_200x200_' . $member->picture;
+             }
+        }
+
+        return $members;
     }
 
     public function create(Request $request)
@@ -181,7 +189,7 @@ class MembersController extends Controller
             'picture' => $imageName,
         ];
 
-        if (Member::where('id', '=',$memberID)->update($payload)) {
+        if (Member::where('id', '=', $memberID)->update($payload)) {
             return response([
                 'message' => 'Member profile information updated successfully.',
                 'status' => 'success'
@@ -191,6 +199,25 @@ class MembersController extends Controller
                 'message' => 'Failed to update member profile information.',
                 'status' => 'failed'
             ]);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $query = strtolower($request->search);
+
+        $members = Member::with('creator')->where('name', 'LIKE', '%' . $query . '%')
+            ->orWhere('member_id', 'LIKE', '%' . $query . '%')
+            ->paginate(10);
+        return $members;
+    }
+
+    public function destroy($memberID)
+    {
+        if (Member::where('id', '=', $memberID)->delete()) {
+            return response(['message' => 'Member deleted successfully by admin.', 'status' => 'success']);
+        } else {
+            return response(['message' => 'Failed to delete member by admin.', 'status' => 'failed']);
         }
     }
 }
