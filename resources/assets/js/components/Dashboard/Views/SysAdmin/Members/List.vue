@@ -42,7 +42,7 @@
                                   @vuetable:pagination-data="onPaginationData"
                         >
                             <template slot="picture" slot-scope="props">
-                                <img :src="props.rowData.picture" alt="" style="width: 50px; height: 50px;">
+                                <img :src="props.rowData.picture" class="table-img" alt="">
                             </template>
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
