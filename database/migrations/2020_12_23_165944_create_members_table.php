@@ -35,6 +35,7 @@ class CreateMembersTable extends Migration
             $table->text('nominee_address')->nullable();
             $table->string('picture', '255')->nullable();
             $table->unsignedBigInteger('creator_id')->nullable();
+            $table->string('member_route_id', '36')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

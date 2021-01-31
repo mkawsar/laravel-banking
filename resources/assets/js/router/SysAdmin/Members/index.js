@@ -4,6 +4,10 @@ const MemberCreate = () => import('~/components/Dashboard/Views/SysAdmin/Members
 const MemberEdit = () => import('~/components/Dashboard/Views/SysAdmin/Members/Edit');
 const MemberDetails = () => import('~/components/Dashboard/Views/SysAdmin/Members/Details');
 
+// Member Route list
+const MemberRouteList = () => import('~/components/Dashboard/Views/SysAdmin/Members/Routes/List');
+
+
 export default [
     {
         path: '/admin/member/',
@@ -34,6 +38,19 @@ export default [
                 component: MemberDetails,
                 meta: {title: 'Member Details', requireAuth: true, roles: ['Admin', 'User']}
             },
+        ]
+    },
+    {
+        path: '/admin/member/routes/',
+        component: DashboardLayout,
+        redirect: '/admin/overview',
+        children: [
+            {
+                path: 'list',
+                name: 'MemberRouteList',
+                component: MemberRouteList,
+                meta: {title: 'Member Route List', requireAuth: true, roles: ['Admin', 'User']}
+            }
         ]
     }
 ]

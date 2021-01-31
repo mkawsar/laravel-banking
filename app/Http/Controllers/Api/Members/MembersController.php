@@ -15,7 +15,7 @@ class MembersController extends Controller
 {
     public function index()
     {
-        $members = Member::with('creator')->paginate(10);
+        $members = Member::with('creator', 'route')->paginate(10);
 
         foreach ($members as $member) {
              if ($member->picture != null) {
@@ -80,6 +80,7 @@ class MembersController extends Controller
         $member = new Member();
         $member->id = $uuid;
         $member->member_id = $memberID;
+        $member->member_route_id = $request->member_route_id;
         $member->name = $request->name;
         $member->father_name = $request->father_name;
         $member->mother_name = $request->mother_name;
@@ -139,7 +140,7 @@ class MembersController extends Controller
             'nominee_father_name' => 'required',
             'nominee_mother_name' => 'required',
             'nominee_address' => 'required',
-            'picture' => 'required'
+            'picture' => 'nullable'
         ]);
 
         $uuid = Uuid::uuid4()->toString();
@@ -171,6 +172,7 @@ class MembersController extends Controller
         }
 
         $payload = [
+            'member_route_id' => $request->member_route_id,
             'name' => $request->name,
             'father_name' => $request->father_name,
             'mother_name' => $request->mother_name,

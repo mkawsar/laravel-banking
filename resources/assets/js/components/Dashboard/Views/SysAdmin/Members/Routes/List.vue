@@ -3,34 +3,42 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb breadcrumb-css">
                 <li class="breadcrumb-item">
-                    <router-link :to="{name: 'Overview'}">Home</router-link>
+                    <router-link :to="{name: 'Overview'}">হোম</router-link>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">List</li>
+                <li class="breadcrumb-item active" aria-current="page">মেম্বার রুট লিস্ট</li>
             </ol>
         </nav>
         <div class="col-md-12 card">
-            <div class="card-header">
-                <h4 class="card-title">
-                    <router-link :to="{name: 'MemberCreate'}" class="btn btn-outline btn-success">
-                        Add Member
-                    </router-link>
-                </h4>
-            </div>
+            <form autocomplete="off">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Enter Member Route Details Below
+                    </h4>
+                </div>
+                <div class="card-content">
+                    <div class="form-group required">
+                        <label for="name" class="control-label">মেম্বার রুট নাম</label>
+                        <input type="text"
+                               name="name"
+                               id="name"
+                               v-validate="routeValidations.name"
+                               v-model="route.name"
+                               placeholder="মেম্বার রুট নাম"
+                               class="form-control">
+                        <span class="text-danger" v-show="errors.has('name')">{{ errors.first('name') }}</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" @click.prevent="handleCreateNewMemberRoute"
+                            class="btn btn-outline btn-info btn-wd">সাবমিট
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-12 card">
             <div class="card-content row">
                 <div class="col-sm-12">
                     <template>
-                        <div class="filter-bar" style="margin-bottom: 10px">
-                            <form class="form-inline">
-                                <label>Search for:</label>
-                                <input type="text"
-                                       v-model="filterText"
-                                       class="form-control"
-                                       @keyup.enter.prevent="doFilter(filterText)"
-                                       placeholder="Name or Member ID">
-                                <button class="btn btn-primary btn-sm" @click.prevent="doFilter(filterText)">Go</button>
-                                <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
-                            </form>
-                        </div>
                         <vuetable ref="vuetable"
                                   :api-url="url"
                                   :http-options="headerOptions"
@@ -41,12 +49,8 @@
                                   @vuetable:loaded="hideLoader"
                                   @vuetable:pagination-data="onPaginationData"
                         >
-                            <template slot="picture" slot-scope="props">
-                                <img :src="props.rowData.picture" class="table-img" alt="">
-                            </template>
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
-                                        @click.prevent="handleMemberDelete(props.rowData.name, props.rowData.id)"
                                         v-tooltip="{
                                             content: 'Delete this member',
                                             placement: 'top-center',
@@ -93,7 +97,8 @@
 </template>
 
 <script>
-import Vue from 'vue';
+import Vue from 'vue'
+import VeeValidate from 'vee-validate'
 import Vuetable from "vuetable-2/src/components/Vuetable";
 import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
 import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
@@ -103,51 +108,53 @@ import {MessageBox} from 'element-ui';
 
 Vue.prototype.$confirm = MessageBox.confirm;
 
+let veeCustomMessage = {
+    en: {
+        custom: {
+            name: {
+                required: 'Full member route name field is required',
+            },
+        }
+    }
+};
+
+let routeObj = {
+    name: ''
+};
+
+Vue.use(VeeValidate, {
+    dictionary: veeCustomMessage,
+    fieldsBagName: routeObj
+});
 export default {
     name: "List",
     data() {
         return {
-            url: this.$env.BACKEND_API + 'admin/member/list',
+            route: routeObj,
+            routeValidations: {
+                name: {
+                    required: true
+                },
+            },
+            url: this.$env.BACKEND_API + 'admin/member/route/list',
             css: VuetableCssConfig,
             filterText: '',
             moreParams: {},
             tableRowsFields: [
                 {
-                    name: 'member_id',
-                    title: 'Member ID'
+                    name: 'name',
+                    title: 'নাম'
                 },
                 {
-                    name: 'route',
-                    title: 'Member Route',
-                    callback: function(route) {
-                        return route.name;
+                    name: 'creator',
+                    title: 'ক্রিয়েটর',
+                    callback: function (user) {
+                        return user.name
                     }
                 },
                 {
-                    name: 'name',
-                    title: 'Name'
-                },
-                {
-                    name: 'phone',
-                    title: 'Mobile'
-                },
-                {
-                    name: 'father_name',
-                    title: 'Father Name'
-                },
-                {
-                    name: 'nominee_name',
-                    title: 'Nominee Name'
-                },
-                {
-                    name: '__slot:picture',
-                    title: 'Picture',
-                    titleClass: 'text-center',
-                    dataClass: 'text-center',
-                },
-                {
                     name: '__slot:actions',
-                    title: 'Actions',
+                    title: 'অ্যাকশন',
                     titleClass: 'text-center',
                     dataClass: 'text-center',
                 }
@@ -161,6 +168,32 @@ export default {
         VuetablePaginationInfo,
     },
     methods: {
+        handleCreateNewMemberRoute() {
+            this.$validator.validateAll().then(isValid => {
+                if (isValid) {
+                    let formData = new FormData();
+                    formData.append('name', this.route.name);
+                    axios.post(this.$env.BACKEND_API + 'admin/member/route/create', formData)
+                        .then(res => {
+                            if (res.data.status === 'validation' || res.data.status === 'failed') {
+                                this.$notification.error(this, 'Error', res.data.message);
+                            } else if (res.data.status === 'success') {
+                                this.$notification.notify(this, 'Success', res.data.message);
+                                Vue.nextTick(() => this.$refs.vuetable.refresh())
+                                this.route.name = '';
+                            } else {
+                                this.$notification.error(this, 'Error', 'Somethings went wrong');
+                            }
+                        })
+                        .catch(err => {
+                            this.$notification.notifyError(this, err.response.data);
+                        })
+                }
+            });
+        },
+        getError(fieldName) {
+            return this.errors.first(fieldName)
+        },
         onPaginationData(paginationData) {
             this.$refs.pagination.setPaginationData(paginationData);
             this.$refs.paginationInfo.setPaginationData(paginationData)
@@ -194,31 +227,6 @@ export default {
         resetFilter() {
             this.filterText = '';
             this.url = this.$env.BACKEND_API + 'admin/member/list'
-        },
-        handleMemberDelete(name, memberID) {
-            this.$confirm('This will delete the user "' + name + '". Continue?', 'Warning', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Cancel',
-                type: 'warning'
-            }).then(() => {
-                axios.delete(this.$env.BACKEND_API + `admin/member/${memberID}/delete`)
-                    .then(res => {
-                        if (res.data.status === 'failed') {
-                            this.$notification.error(this, 'Error', res.data.message);
-                        } else if (res.data.status === 'success') {
-                            this.$notification.notify(this, 'Success', res.data.message);
-                            this.$refs.vuetable.refresh();
-                        } else {
-                            this.$notification.error(this, 'Error', 'Somethings went wrong');
-                        }
-                    })
-                    .catch(err => {
-                        this.$notification.error(this, 'Error', err.response.data);
-                    })
-            })
-                .catch(() => {
-                    //this.$notification.error(this, 'Error', 'Somethings went wrong');
-                })
         }
     }
 }

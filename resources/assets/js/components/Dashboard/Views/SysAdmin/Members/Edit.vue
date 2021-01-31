@@ -30,6 +30,17 @@
                                    class="form-control" readonly="readonly">
                         </div>
                         <div class="form-group required">
+                            <label for="member_route_id" class="control-label">Member Route ID</label>
+                            <select name="member_route_id" id="role_id" class="form-control" v-model="member.member_route_id"
+                                    v-validate="memberValidations.member_route_id">
+                                <option v-for="(route, index) in routes" :key="index" v-bind:value="route.id">
+                                    {{route.name }}
+                                </option>
+                            </select>
+                            <span class="text-danger"
+                                  v-show="errors.has('member_route_id')">{{ errors.first('member_route_id') }}</span>
+                        </div>
+                        <div class="form-group required">
                             <label for="name" class="control-label">Name</label>
                             <input type="text"
                                    name="name"
@@ -249,6 +260,9 @@ let veeCustomMessage = {
                 min: 'Member ID field must be at least 4 characters',
                 max: 'Member ID field may not be greater than 4 characters'
             },
+            member_route_id: {
+                required: 'Member route field is required',
+            },
             name: {
                 required: 'Full name field is required',
             },
@@ -287,15 +301,13 @@ let veeCustomMessage = {
             },
             nominee_address: {
                 required: 'Nominee address field is required',
-            },
-            picture: {
-                required: 'Member picture field is required',
-            },
+            }
         }
     }
 };
 
 let memberObj = {
+    member_route_id: '',
     member_id: '',
     name: '',
     father_name: '',
@@ -335,6 +347,9 @@ export default {
                     max: 4,
                     min: 4
                 },
+                member_route_id: {
+                    required: true
+                },
                 name: {
                     required: true
                 },
@@ -367,17 +382,14 @@ export default {
                 },
                 nominee_address: {
                     required: true
-                },
-                picture: {
-                    required: true
-                },
-
+                }
             },
             disabled: false,
             format: "dd/MM/yyyy",
             checked: false,
             year: '',
-            readonly: false
+            readonly: false,
+            routes: []
         }
     },
     methods: {
@@ -389,6 +401,7 @@ export default {
             this.$router.push({name: 'MemberList'});
         },
         reset() {
+            this.member.member_route_id = '';
             this.member.member_id = '';
             this.member.name = '';
             this.member.father_name = '';
@@ -413,6 +426,7 @@ export default {
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
                     let formData = new FormData();
+                    formData.append('member_route_id', this.member.member_route_id);
                     formData.append('member_id', this.member.member_id);
                     formData.append('name', this.member.name);
                     formData.append('father_name', this.member.father_name);
@@ -464,6 +478,7 @@ export default {
             axios.get(this.$env.BACKEND_API + `admin/member/${memberID}/details`)
                 .then(res => {
                     if (res) {
+                        this.member.member_route_id = res.data.member_route_id;
                         this.member.member_id = res.data.member_id;
                         this.member.name = res.data.name;
                         this.member.father_name = res.data.father_name;
@@ -484,6 +499,13 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
+                });
+            axios.get(this.$env.BACKEND_API + 'admin/member/route')
+                .then(res => {
+                    this.routes = res.data
+                })
+                .catch(err => {
+                    this.$notification.notifyError(this, err.response.data);
                 })
         }
     },

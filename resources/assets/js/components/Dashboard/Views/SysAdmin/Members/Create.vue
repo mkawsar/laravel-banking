@@ -34,6 +34,17 @@
                                 }}</span>
                         </div>
                         <div class="form-group required">
+                            <label for="member_route_id" class="control-label">Member Route ID</label>
+                            <select name="member_route_id" id="role_id" class="form-control" v-model="member.member_route_id"
+                                    v-validate="memberValidations.member_route_id">
+                                <option v-for="(route, index) in routes" :key="index" v-bind:value="route.id">
+                                    {{route.name }}
+                                </option>
+                            </select>
+                            <span class="text-danger"
+                                  v-show="errors.has('member_route_id')">{{ errors.first('member_route_id') }}</span>
+                        </div>
+                        <div class="form-group required">
                             <label for="name" class="control-label">Name</label>
                             <input type="text"
                                    name="name"
@@ -257,6 +268,9 @@ let veeCustomMessage = {
                 min: 'Member ID field must be at least 4 characters',
                 max: 'Member ID field may not be greater than 4 characters'
             },
+            member_route_id: {
+                required: 'Member route field is required',
+            },
             name: {
                 required: 'Full name field is required',
             },
@@ -320,7 +334,8 @@ let memberObj = {
     nominee_father_name: '',
     nominee_mother_name: '',
     nominee_address: '',
-    picture: ''
+    picture: '',
+    member_route_id: ''
 };
 
 Vue.use(VeeValidate, {
@@ -344,6 +359,9 @@ export default {
                     min: 4
                 },
                 name: {
+                    required: true
+                },
+                member_route_id: {
                     required: true
                 },
                 father_name: {
@@ -385,7 +403,8 @@ export default {
             format: "dd/MM/yyyy",
             checked: false,
             year: '',
-            readonly: false
+            readonly: false,
+            routes: []
         }
     },
     methods: {
@@ -398,6 +417,7 @@ export default {
         },
         reset() {
             this.member.member_id = '';
+            this.member.member_route_id = '';
             this.member.name = '';
             this.member.father_name = '';
             this.member.mother_name = '';
@@ -421,6 +441,7 @@ export default {
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
                     let formData = new FormData();
+                    formData.append('member_route_id', this.member.member_route_id);
                     formData.append('member_id', this.member.member_id);
                     formData.append('name', this.member.name);
                     formData.append('father_name', this.member.father_name);
@@ -442,10 +463,8 @@ export default {
                     axios.post(this.$env.BACKEND_API + 'admin/member/create', formData)
                         .then(res => {
                             if (res.data.status === 'validation' || res.data.status === 'failed') {
-                                console.log(res.data)
                                 this.$notification.error(this, 'Error', res.data.message);
                             } else if (res.data.status === 'success') {
-                                console.log('test')
                                 this.$notification.notify(this, 'Success', res.data.message);
                                 this.$router.push({name: 'MemberList'});
                                 this.reset();
@@ -469,10 +488,20 @@ export default {
         },
         handleFileOnChange() {
             this.member.picture = this.$refs.picture.files[0];
+        },
+        handleFetchInitialFunc() {
+            this.year = this.$moment().year();
+            axios.get(this.$env.BACKEND_API + 'admin/member/route')
+                .then(res => {
+                    this.routes = res.data
+                })
+                .catch(err => {
+                    this.$notification.notifyError(this, err.response.data);
+                })
         }
     },
     mounted() {
-        this.year = this.$moment().year();
+        this.handleFetchInitialFunc();
     }
 }
 </script>
