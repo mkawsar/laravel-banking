@@ -20,3 +20,4 @@ public/js
 public/fonts
 public/mix-manifest.json
 resources/assets/js/env.js
+.DS_Store

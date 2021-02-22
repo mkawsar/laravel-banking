@@ -51,34 +51,15 @@
                         >
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
+                                        @click.prevent="handleDeleteRoute(props.rowData)"
                                         v-tooltip="{
-                                            content: 'Delete this member',
+                                            content: 'Delete this member route',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
                                             offset: 10,}">
                                     <i class="ti-close"></i>
                                 </button>
-                                <router-link :to="{name: 'MemberEdit', params: { memberID: props.rowData.id }}"
-                                             class="btn btn-simple btn-xs btn-success btn-icon"
-                                             v-tooltip="{
-                                            content: 'Edit this member',
-                                            placement: 'top-center',
-                                            classes: ['info'],
-                                            targetClasses: ['it-has-a-tooltip'],
-                                            offset: 10,}">
-                                    <i class="ti-pencil"></i>
-                                </router-link>
-                                <router-link :to="{name: 'MemberDetails', params: { memberID: props.rowData.id }}"
-                                             class="btn btn-simple btn-xs btn-warning btn-icon"
-                                             v-tooltip="{
-                                            content: 'Details this member',
-                                            placement: 'top-center',
-                                            classes: ['info'],
-                                            targetClasses: ['it-has-a-tooltip'],
-                                            offset: 10,}">
-                                    <i class="ti-eye"></i>
-                                </router-link>
                             </template>
                         </vuetable>
                         <div class="vuetable-pagination ui basic segment grid">
@@ -227,6 +208,31 @@ export default {
         resetFilter() {
             this.filterText = '';
             this.url = this.$env.BACKEND_API + 'admin/member/list'
+        },
+        handleDeleteRoute(route) {
+            this.$confirm('This will delete the user "' + route.name + '". Continue?', 'Warning', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel',
+                type: 'warning'
+            }).then(() => {
+                axios.delete(this.$env.BACKEND_API + `admin/member/route/${route.id}/delete`)
+                    .then(res => {
+                        if (res.data.status === 'failed') {
+                            this.$notification.error(this, 'Error', res.data.message);
+                        } else if (res.data.status === 'success') {
+                            this.$notification.notify(this, 'Success', res.data.message);
+                            this.$refs.vuetable.refresh();
+                        } else {
+                            this.$notification.error(this, 'Error', 'Somethings went wrong');
+                        }
+                    })
+                    .catch(err => {
+                        this.$notification.error(this, 'Error', err.response.data);
+                    })
+            })
+                .catch(() => {
+                    //this.$notification.error(this, 'Error', 'Somethings went wrong');
+                })
         }
     }
 }

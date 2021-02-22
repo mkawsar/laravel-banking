@@ -11,4 +11,5 @@ Route::group([
     Route::get('/', 'MemberRouteController@index');
     Route::get('list', 'MemberRouteController@list');
     Route::post('create', 'MemberRouteController@create');
+    Route::delete('{routeId}/delete', 'MemberRouteController@destroy');
 });

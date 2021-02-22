@@ -66,7 +66,7 @@
                                 }}</span>
                         </div>
                         <div class="form-group required">
-                            <label for="mother_name" class="control-label">Father Name</label>
+                            <label for="mother_name" class="control-label">Mother Name</label>
                             <input type="text"
                                    name="mother_name"
                                    id="mother_name"

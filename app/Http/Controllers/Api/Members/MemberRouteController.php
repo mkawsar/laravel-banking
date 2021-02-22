@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Members;
 
 use App\Http\Controllers\Controller;
+use App\Models\Members\Member;
 use App\Models\Members\MemberRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +48,29 @@ class MemberRouteController extends Controller
         } else {
             return response([
                 'message' => 'Failed to member route information save.',
+                'status' => 'failed'
+            ]);
+        }
+    }
+
+    public function destroy($routeID)
+    {
+        $member = Member::where('member_route_id', '=', $routeID)->first();
+        if (!empty($member)) {
+            return response([
+                'message' => 'এই রুট এ আপনার মেম্বার রেজিস্টার আছে, এই রুটের মেম্বার ডিলিট করুন/এডিট করুন, তারপরে রুট ডিলিট করুন',
+                'status' => 'failed'
+            ]);
+        }
+
+        if (MemberRoute::where('id', '=', $routeID)->delete()) {
+            return response([
+                'message' => 'এই রুটটি সুকসেসফুল্লি ডিলিট হয়েছে',
+                'status' => 'success'
+            ]);
+        } else {
+            return response([
+                'message' => 'এই রুটটি কোনো কারণে ডিলিট হয়নাই',
                 'status' => 'failed'
             ]);
         }
