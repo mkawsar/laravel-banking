@@ -2,7 +2,7 @@
     <footer class="footer footer-transparent">
         <div class="container">
             <div class="copyright">
-                Copyright &copy; {{date}} AmarDiet
+                Copyright &copy; {{date}} msrssl
             </div>
         </div>
     </footer>

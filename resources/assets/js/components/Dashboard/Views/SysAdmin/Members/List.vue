@@ -11,9 +11,8 @@
         <div class="col-md-12 card">
             <div class="card-header">
                 <h4 class="card-title">
-                    <router-link
-                        :to="{name: 'UserCreate'}"
-                        class="btn btn-outline btn-success">Add User
+                    <router-link :to="{name: 'MemberCreate'}" class="btn btn-outline btn-success">
+                        Add Member
                     </router-link>
                 </h4>
             </div>
@@ -27,7 +26,7 @@
                                        v-model="filterText"
                                        class="form-control"
                                        @keyup.enter.prevent="doFilter(filterText)"
-                                       placeholder="Name">
+                                       placeholder="Name or Member ID">
                                 <button class="btn btn-primary btn-sm" @click.prevent="doFilter(filterText)">Go</button>
                                 <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
                             </form>
@@ -42,26 +41,39 @@
                                   @vuetable:loaded="hideLoader"
                                   @vuetable:pagination-data="onPaginationData"
                         >
+                            <template slot="picture" slot-scope="props">
+                                <img :src="props.rowData.picture" class="table-img" alt="">
+                            </template>
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
-                                        @click.prevent="handleUserDelete(props.rowData.name, props.rowData.id)"
+                                        @click.prevent="handleMemberDelete(props.rowData.name, props.rowData.id)"
                                         v-tooltip="{
-                                            content: 'Delete this user',
+                                            content: 'Delete this member',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
                                             offset: 10,}">
                                     <i class="ti-close"></i>
                                 </button>
-                                <router-link :to="{name: 'UserEdit', params: { userID: props.rowData.id }}"
-                                             class="btn btn-simple btn-xs btn-danger btn-icon"
+                                <router-link :to="{name: 'MemberEdit', params: { memberID: props.rowData.id }}"
+                                             class="btn btn-simple btn-xs btn-success btn-icon"
                                              v-tooltip="{
-                                            content: 'Edit this user',
+                                            content: 'Edit this member',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
                                             offset: 10,}">
                                     <i class="ti-pencil"></i>
+                                </router-link>
+                                <router-link :to="{name: 'MemberDetails', params: { memberID: props.rowData.id }}"
+                                             class="btn btn-simple btn-xs btn-warning btn-icon"
+                                             v-tooltip="{
+                                            content: 'Details this member',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                    <i class="ti-eye"></i>
                                 </router-link>
                             </template>
                         </vuetable>
@@ -90,28 +102,48 @@ import VuetableCssConfig from "~/plugins/VuetableCssConfig";
 import {MessageBox} from 'element-ui';
 
 Vue.prototype.$confirm = MessageBox.confirm;
+
 export default {
+    name: "List",
     data() {
         return {
-            url: this.$env.BACKEND_API + 'admin/user/list',
+            url: this.$env.BACKEND_API + 'admin/member/list',
             css: VuetableCssConfig,
             filterText: '',
             moreParams: {},
             tableRowsFields: [
                 {
+                    name: 'member_id',
+                    title: 'Member ID'
+                },
+                {
+                    name: 'route',
+                    title: 'Member Route',
+                    callback: function(route) {
+                        return route.name;
+                    }
+                },
+                {
                     name: 'name',
                     title: 'Name'
                 },
                 {
-                    name: 'email',
-                    title: 'Email'
+                    name: 'phone',
+                    title: 'Mobile'
                 },
                 {
-                    name: 'role',
-                    title: 'Role',
-                    callback: function (item) {
-                        return item.name;
-                    }
+                    name: 'father_name',
+                    title: 'Father Name'
+                },
+                {
+                    name: 'nominee_name',
+                    title: 'Nominee Name'
+                },
+                {
+                    name: '__slot:picture',
+                    title: 'Picture',
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
                 },
                 {
                     name: '__slot:actions',
@@ -152,25 +184,24 @@ export default {
             this.moreParams = {};
             Vue.nextTick(() => this.$refs.vuetable.refresh())
         },
-
         doFilter() {
             if (this.filterText === '') {
-                this.url = this.$env.BACKEND_API + 'admin/user/list';
+                this.url = this.$env.BACKEND_API + 'admin/member/list';
             } else {
-                this.url = this.$env.BACKEND_API + `admin/user/search?search=${this.filterText}`;
+                this.url = this.$env.BACKEND_API + `admin/member/search?search=${this.filterText}`;
             }
         },
         resetFilter() {
             this.filterText = '';
-            this.url = this.$env.BACKEND_API + 'admin/user/list'
+            this.url = this.$env.BACKEND_API + 'admin/member/list'
         },
-        handleUserDelete(name, userId) {
+        handleMemberDelete(name, memberID) {
             this.$confirm('This will delete the user "' + name + '". Continue?', 'Warning', {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Cancel',
                 type: 'warning'
             }).then(() => {
-                axios.delete(this.$env.BACKEND_API + `admin/user/${userId}/delete`)
+                axios.delete(this.$env.BACKEND_API + `admin/member/${memberID}/delete`)
                     .then(res => {
                         if (res.data.status === 'failed') {
                             this.$notification.error(this, 'Error', res.data.message);
@@ -186,9 +217,13 @@ export default {
                     })
             })
                 .catch(() => {
-                    this.$notification.error(this, 'Error', 'Somethings went wrong');
+                    //this.$notification.error(this, 'Error', 'Somethings went wrong');
                 })
         }
     }
 }
 </script>
+
+<style scoped>
+
+</style>

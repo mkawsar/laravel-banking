@@ -7,7 +7,7 @@
                 <div class="content">
                     <div class="container">
                         <div class="row text-center title-login-div">
-                            <router-link class="title-login" to="/login">AMAR DIET</router-link>
+                            <router-link class="title-login" to="/login">MSRSSL</router-link>
                         </div>
                         <div class="row">
                             <div class="col-md-4 col-sm-6 col-md-offset-4 col-sm-offset-3">

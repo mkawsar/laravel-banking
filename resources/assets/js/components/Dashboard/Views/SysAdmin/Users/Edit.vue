@@ -8,7 +8,7 @@
                 <li class="breadcrumb-item">
                     <router-link :to="{name: 'UserList'}">User List</router-link>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">List</li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
             </ol>
         </nav>
         <div class="col-md-12">
@@ -31,57 +31,32 @@
                             <span class="text-danger" v-show="errors.has('name')">{{ errors.first('name') }}</span>
                         </div>
 
-                        <div class="form-group required">
+                        <div class="form-group">
                             <label for="email" class="control-label">Email</label>
                             <input type="email"
                                    name="email"
                                    id="email"
                                    class="form-control"
-                                   v-validate="userValidations.email"
-                                   v-model="user.email">
-                            <span class="text-danger" v-show="errors.has('email')">{{ errors.first('email') }}</span>
+                                   v-model="user.email" readonly>
                         </div>
 
                         <div class="form-group required">
                             <label for="role_id" class="control-label">Roles</label>
                             <select name="role_id" id="role_id" class="form-control" v-model="user.role_id"
                                     v-validate="userValidations.role_id">
-                                <option v-for="(role, index) in roles" :key="index" v-bind:value="role.id">{{
-                                        role.name
-                                    }} ({{ role.description }})
+                                <option v-for="(role, index) in roles" :key="index" v-bind:value="role.id">
+                                    {{ role.name }} ({{ role.description }})
                                 </option>
                             </select>
-                            <span class="text-danger"
-                                  v-show="errors.has('role_id')">{{ errors.first('role_id') }}</span>
-                        </div>
-                        <div class="form-group required">
-                            <label for="password" class="control-label">Password</label>
-                            <input type="password"
-                                   name="password"
-                                   id="password"
-                                   ref="password"
-                                   class="form-control"
-                                   v-validate="userValidations.password"
-                                   v-model="user.password">
-                            <span class="text-danger"
-                                  v-show="errors.has('password')">{{ errors.first('password') }}</span>
-                        </div>
-                        <div class="form-group required">
-                            <label for="confirm" class="control-label">Confirm Password</label>
-                            <input type="password"
-                                   name="confirm"
-                                   id="confirm"
-                                   class="form-control"
-                                   v-validate="userValidations.confirmPassword"
-                                   v-model="user.confirm_password">
-                            <span class="text-danger"
-                                  v-show="errors.has('confirm')">{{ errors.first('confirm') }}</span>
+                            <span class="text-danger" v-show="errors.has('role_id')">
+                                {{ errors.first('role_id') }}
+                            </span>
                         </div>
                     </div>
                     <div class="card-footer">
-                        <button type="submit" @click.prevent="handleCreateNewUser"
+                        <button type="submit" @click.prevent="handleEditUser"
                                 class="btn btn-outline btn-info btn-wd"
-                                v-bind:disabled="disabled">Create User
+                                v-bind:disabled="disabled">Edit User
                         </button>
                         <button type="submit" @click.prevent="cancel"
                                 class="btn btn-outline btn-danger btn-wd"
@@ -105,19 +80,8 @@ let veeCustomMessage = {
             name: {
                 required: 'Name field is required',
             },
-            email: {
-                required: 'Email field is required',
-                email: '',
-            },
             role_id: {
                 required: 'Please select a Role',
-            },
-            password: {
-                required: 'Password field is required',
-            },
-            confirm: {
-                required: 'Confirm password field is required',
-                confirmed: 'The confirm password field must be same as password'
             }
         }
     }
@@ -126,9 +90,7 @@ let veeCustomMessage = {
 let userObj = {
     name: '',
     email: '',
-    role_id: '',
-    password: '',
-    confirm_password: '',
+    role_id: ''
 };
 
 Vue.use(VeeValidate, {
@@ -146,22 +108,11 @@ export default {
                 },
                 role_id: {
                     required: true
-                },
-                email: {
-                    required: true,
-                    email: true,
-                },
-                password: {
-                    required: true,
-                    min: 6
-                },
-                confirmPassword: {
-                    required: true,
-                    confirmed: 'password'
                 }
             },
             roles: [],
-            disabled: false
+            disabled: false,
+            userID: ''
         }
     },
     methods: {
@@ -186,26 +137,21 @@ export default {
         reset: function () {
             this.user = {};
         },
-
-        handleCreateNewUser() {
+        handleEditUser() {
             this.disabled = true;
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
                     let formData = new FormData();
-                    formData.append('name', this.user.name);
-                    formData.append('email', this.user.email);
-                    formData.append('password', this.user.password);
-                    formData.append('confirm_password', this.user.confirm_password);
+                    formData.append('name', this.user.name)
                     formData.append('role_id', this.user.role_id);
 
-                    axios.post(this.$env.BACKEND_API + 'admin/user/create', formData)
+                    axios.post(this.$env.BACKEND_API + `admin/user/${this.userID}/update`, formData)
                         .then(res => {
                             if (res.data.status === 'validation' || res.data.status === 'failed') {
                                 this.$notification.error(this, 'Error', res.data.message);
                             } else if (res.data.status === 'success') {
                                 this.$notification.notify(this, 'Success', res.data.message);
                                 this.$router.push({name: 'UserList'});
-                                this.reset();
                             } else {
                                 this.$notification.error(this, 'Error', 'Somethings went wrong');
                             }
@@ -217,10 +163,21 @@ export default {
                         })
                 }
             });
+        },
+        handleGetUserDetails(userID) {
+            axios.get(this.$env.BACKEND_API + `admin/user/${userID}/details`)
+                .then(res => {
+                    this.user = {...res.data};
+                })
+                .catch(err => {
+                    this.$notification.notifyError(this, error.response.data);
+                })
         }
     },
     mounted() {
         this.handleGetAllRole();
+        this.userID = this.$route.params.userID
+        this.handleGetUserDetails(this.userID);
     }
 }
 </script>
