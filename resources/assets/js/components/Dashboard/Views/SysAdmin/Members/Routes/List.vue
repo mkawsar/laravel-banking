@@ -60,6 +60,10 @@
                                             offset: 10,}">
                                     <i class="ti-close"></i>
                                 </button>
+                                <router-link :to="{name: 'MemberRouteDetails', params: { routeID: props.rowData.id }}"
+                                             class="btn btn-simple btn-xs btn-success btn-icon remove">
+                                    <i class="ti-eye"></i>
+                                </router-link>
                             </template>
                         </vuetable>
                         <div class="vuetable-pagination ui basic segment grid">

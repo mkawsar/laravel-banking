@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\Members;
 
+use App\Exports\MemberExport;
 use App\Http\Controllers\Controller;
 use App\Models\Members\Member;
 use App\Models\Members\MemberRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Ramsey\Uuid\Uuid;
 
 class MemberRouteController extends Controller
@@ -16,10 +18,12 @@ class MemberRouteController extends Controller
     {
         return MemberRoute::with('creator')->get();
     }
+
     public function list()
     {
         return MemberRoute::with('creator')->paginate(10);
     }
+
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -74,5 +78,42 @@ class MemberRouteController extends Controller
                 'status' => 'failed'
             ]);
         }
+    }
+
+    public function details($routeID)
+    {
+        $members = Member::with('creator', 'route')
+            ->where('member_route_id', '=', $routeID)
+            ->paginate(10);
+
+        foreach ($members as $member) {
+            if ($member->picture != null) {
+                $member->picture = config('constant.app.url') . 'images/members/thumb/thumb_200x200_' . $member->picture;
+            }
+        }
+
+        return $members;
+    }
+
+    public function search(Request $request, $routeID)
+    {
+        $query = strtolower($request->search);
+
+        $members = Member::with('creator', 'route')
+            ->where('member_route_id', '=', $routeID)
+            ->where('name', 'LIKE', '%' . $query . '%')
+            ->orWhere('member_id', 'LIKE', '%' . $query . '%')
+            ->paginate(10);
+        foreach ($members as $member) {
+            if ($member->picture != null) {
+                $member->picture = config('constant.app.url') . 'images/members/thumb/thumb_200x200_' . $member->picture;
+            }
+        }
+        return $members;
+    }
+
+    public function download($routeID)
+    {
+        return Excel::download(new MemberExport($routeID), 'test.xls');
     }
 }

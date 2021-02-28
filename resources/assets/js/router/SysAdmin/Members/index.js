@@ -6,6 +6,7 @@ const MemberDetails = () => import('~/components/Dashboard/Views/SysAdmin/Member
 
 // Member Route list
 const MemberRouteList = () => import('~/components/Dashboard/Views/SysAdmin/Members/Routes/List');
+const MemberRouteDetails = () => import('~/components/Dashboard/Views/SysAdmin/Members/Routes/Details');
 
 
 export default [
@@ -50,6 +51,12 @@ export default [
                 name: 'MemberRouteList',
                 component: MemberRouteList,
                 meta: {title: 'Member Route List', requireAuth: true, roles: ['Admin', 'User']}
+            },
+            {
+                path: 'list/:routeID/details',
+                name: 'MemberRouteDetails',
+                component: MemberRouteDetails,
+                meta: {title: 'Member Route Details', requireAuth: true, roles: ['Admin', 'User']}
             }
         ]
     }
