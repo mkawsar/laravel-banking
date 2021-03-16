@@ -21,7 +21,8 @@ class MemberExport implements FromView, ShouldAutoSize, WithEvents
 
     public function view(): View
     {
-        return \view('excel.members');
+        $members = Member::where('member_route_id', '=', $this->routeID)->get();
+        return \view('excel.members', compact('members'));
     }
 
     public function registerEvents(): array

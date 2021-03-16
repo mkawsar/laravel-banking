@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Ramsey\Uuid\Uuid;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class MemberRouteController extends Controller
 {
@@ -114,6 +115,8 @@ class MemberRouteController extends Controller
 
     public function download($routeID)
     {
-        return Excel::download(new MemberExport($routeID), 'test.xls');
+        $route = MemberRoute::find($routeID);
+        $name = $route->name . '-' . Uuid::uuid4()->toString() . '.pdf';
+        return Excel::download(new MemberExport($routeID), $name);
     }
 }
