@@ -232,7 +232,7 @@ class MemberRouteController extends Controller
         $html .= '</body></html>';
 
         $mpdf->WriteHTML($html);
-        $mpdf->Output();
-//        $mpdf->Output($name, 'D');
+//        $mpdf->Output();
+        $mpdf->Output($name, 'D');
     }
 }
