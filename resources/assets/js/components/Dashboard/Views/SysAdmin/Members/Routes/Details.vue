@@ -227,7 +227,7 @@ export default {
             console.log(this.$route.params.routeID)
             // console.log(window.location.host + this.$env.BACKEND_API + `admin/member/route/${this.$route.params.routeID}/download`);
             // window.open('http://www.google.com');
-            window.location.href = `http://127.0.0.1:8000/api/v1/admin/member/route/${this.$route.params.routeID}/download`;
+            window.location.href = this.$env.BACKEND_API + `admin/member/route/${this.$route.params.routeID}/download`;
         }
     },
     mounted() {
