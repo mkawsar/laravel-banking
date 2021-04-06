@@ -11,7 +11,7 @@
         <div class="col-md-12 card">
             <div class="card-header">
                 <h4 class="card-title">
-                    <router-link :to="{name: 'MemberCreate'}" class="btn btn-outline btn-success">
+                    <router-link :to="{name: 'DailySavingsCreate'}" class="btn btn-outline btn-success">
                         দৈনিক সঞ্চয় যোগ
                     </router-link>
                 </h4>
@@ -21,16 +21,23 @@
                     <template>
                         <div class="filter-bar" style="margin-bottom: 10px">
                             <form class="form-inline" @submit.prevent="doFilter">
-                                <label>Search for:</label>
-                                <input type="text"
-                                       v-model="filterText"
-                                       class="form-control"
-                                       placeholder="Name or Member ID">
-                                <input type="date"
-                                       v-model="filterDate"
-                                       class="form-control">
-                                <button class="btn btn-primary btn-sm">Go</button>
-                                <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
+                                <div class="row">
+                                    <div class="col-xs-5">
+                                        <input type="text"
+                                               v-model="filterText"
+                                               class="form-control" placeholder="Name or Member ID">
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <datepicker
+                                            :format="format"
+                                            v-model="filterDate"
+                                            input-class="form-control"/>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <button class="btn btn-primary btn-sm">Go</button>
+                                        <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                         <vuetable ref="vuetable"
@@ -77,6 +84,7 @@ import Vuetable from "vuetable-2/src/components/Vuetable";
 import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
 import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
 import VuetableCssConfig from "~/plugins/VuetableCssConfig";
+import Datepicker from "vuejs-datepicker/dist/vuejs-datepicker.esm.js";
 
 import {MessageBox} from 'element-ui';
 
@@ -87,7 +95,8 @@ export default {
     components: {
         Vuetable,
         VuetablePagination,
-        VuetablePaginationInfo
+        VuetablePaginationInfo,
+        datepicker: Datepicker
     },
     data() {
         return {
@@ -96,6 +105,7 @@ export default {
             filterText: '',
             filterDate: '',
             moreParams: {},
+            format: 'yyyy-MM-dd',
             tableRowsFields: [
                 {
                     name: 'member',
@@ -165,7 +175,11 @@ export default {
             if (this.filterText === '' && this.filterDate === '') {
                 this.url = this.$env.BACKEND_API + 'admin/accounting/daily/saving/list';
             } else {
-                this.url = this.$env.BACKEND_API + `admin/accounting/daily/saving/list/search?search=${this.filterText}&date=${this.filterDate}`;
+                let date = '';
+                if (this.filterDate !== '') {
+                    date = this.$moment(this.filterDate).format('Y-MM-DD H:m:s');
+                }
+                this.url = this.$env.BACKEND_API + `admin/accounting/daily/saving/list/search?search=${this.filterText}&date=${date}`;
             }
         },
         resetFilter() {

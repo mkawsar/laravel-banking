@@ -9,6 +9,7 @@ Route::group([
     'roles' => ['admin', 'user', 'operator']
 ], function () {
     Route::get('list', 'MembersController@index');
+    Route::get('list/without/pagination', 'MembersController@list');
     Route::post('create', 'MembersController@create');
     Route::get('{memberID}/details', 'MembersController@show');
     Route::post('{memberID}/update', 'MembersController@update');

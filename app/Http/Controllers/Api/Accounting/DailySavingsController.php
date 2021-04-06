@@ -43,7 +43,7 @@ class DailySavingsController extends Controller
         if (!empty($todaySaving)) {
             return response([
                 'message' => 'ইতিমধ্যে এই মেম্বারের দৈনিক সঞ্চয় যোগ করা হয়েছে।',
-                'status' => 'success'
+                'status' => 'failed'
             ]);
         }
 

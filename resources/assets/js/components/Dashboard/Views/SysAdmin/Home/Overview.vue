@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-4 col-sm-6">
             <div class="card">
                 <div class="card-content">
                     <router-link :to="{name: 'MemberList'}">
@@ -12,7 +12,7 @@
                             </div>
                             <div class="col-xs-7">
                                 <div class="numbers">
-                                    <p>{{ 'Member'| pluralize(members) }}</p>
+                                    <p>মেম্বার সংখ্যা</p>
                                     {{ members }}
                                 </div>
                             </div>
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-4 col-sm-6">
             <div class="card">
                 <div class="card-content">
                     <router-link :to="{name: 'MemberRouteList'}">
@@ -33,7 +33,7 @@
                             </div>
                             <div class="col-xs-7">
                                 <div class="numbers">
-                                    <p>{{ 'Route'| pluralize(routes) }}</p>
+                                    <p>রুট সংখ্যা</p>
                                     {{ routes }}
                                 </div>
                             </div>
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-4 col-sm-6">
             <div class="card">
                 <div class="card-content">
                     <div class="row">
@@ -53,33 +53,15 @@
                         </div>
                         <div class="col-xs-7">
                             <div class="numbers">
-                                <p>Errors</p>
-                                23
+                                <p>মোট সঞ্চয়</p>
+                                {{savings}}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card">
-                <div class="card-content">
-                    <div class="row">
-                        <div class="col-xs-5">
-                            <div class="icon-big icon-info text-center">
-                                <i class="ti-twitter-alt"></i>
-                            </div>
-                        </div>
-                        <div class="col-xs-7">
-                            <div class="numbers">
-                                <p>Followers</p>
-                                +45
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </template>
 
@@ -107,7 +89,8 @@ export default {
     data() {
         return {
             members: 0,
-            routes: 0
+            routes: 0,
+            savings: 0
         }
     },
     methods: {
@@ -125,6 +108,7 @@ export default {
                 .then(res => {
                     this.members = res.data.members;
                     this.routes = res.data.routes;
+                    this.savings = res.data.savings;
                 })
                 .catch(err => {
                     console.log(err);

@@ -26,6 +26,12 @@ class MembersController extends Controller
         return $members;
     }
 
+    // Member list without pagination
+    public function list()
+    {
+        return Member::all();
+    }
+
     public function create(Request $request)
     {
         $memberID = '00' . Carbon::now()->year . $request->member_id;
