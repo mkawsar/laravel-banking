@@ -23,5 +23,11 @@ export default [
         icon: 'fa fa-road',
         path: '/admin/member/routes/list',
         meta: {requireAuth: true, roles: ['Admin']},
+    },
+    {
+        name: 'দৈনিক সঞ্চয়',
+        icon: 'fa fa-life-ring',
+        path: '/admin/accounting/daily/savings/list',
+        meta: {requireAuth: true, roles: ['Admin']},
     }
 ]
