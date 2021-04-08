@@ -11,6 +11,7 @@ import homeRouteSysAdmin from '~/router/SysAdmin/Home';
 import UsersRoute from '~/router/SysAdmin/Users';
 import MembersRoute from '~/router/SysAdmin/Members';
 import AccountingDailySavingRoute from '~/router/SysAdmin/Accounting/DailySavings';
+import AccountingTotalSavingRoute from '~/router/SysAdmin/Accounting/TotalSavings';
 
 const baseRoutes = [
     {
@@ -32,7 +33,8 @@ const routes = baseRoutes.concat(
     homeRouteSysAdmin,
     UsersRoute,
     MembersRoute,
-    AccountingDailySavingRoute
+    AccountingDailySavingRoute,
+    AccountingTotalSavingRoute
 );
 
 export default routes;

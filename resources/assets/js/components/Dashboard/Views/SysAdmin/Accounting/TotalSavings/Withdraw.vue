@@ -6,14 +6,14 @@
                     <router-link :to="{name: 'Overview'}">হোম</router-link>
                 </li>
                 <li class="breadcrumb-item">
-                    <router-link :to="{name: 'DailySavingsList'}">দৈনিক সঞ্চয় লিস্ট</router-link>
+                    <router-link :to="{name: 'TotalSavingsList'}">মোট সঞ্চয় লিস্ট</router-link>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">দৈনিক সঞ্চয় যোগ</li>
+                <li class="breadcrumb-item active" aria-current="page">সঞ্চয় উত্তোলন</li>
             </ol>
         </nav>
         <div class="col-md-12">
             <div class="card">
-                <form autocomplete="off">
+                <form autocomplete="off" @submit.prevent="handleSavingsAmountWithdraw">
                     <div class="card-content">
                         <div class="form-group required">
                             <label class="control-label">Member</label>
@@ -30,8 +30,8 @@
                             <input type="text"
                                    name="amount"
                                    id="amount"
-                                   v-model="savings.amount"
-                                   v-validate="savingsValidations.amount"
+                                   v-model="withdraw.amount"
+                                   v-validate="withdrawValidation.amount"
                                    class="form-control">
                             <span class="text-danger" v-show="errors.has('amount')">
                                 {{ errors.first('amount') }}
@@ -39,8 +39,8 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <button type="submit" @click.prevent="handleAddMemberDailySavings"
-                                class="btn btn-outline btn-info btn-wd">দৈনিক সঞ্চয় যোগ
+                        <button type="submit"
+                                class="btn btn-outline btn-info btn-wd">সঞ্চয় উত্তোলন
                         </button>
                         <button type="submit" @click.prevent="cancel"
                                 class="btn btn-outline btn-danger btn-wd"
@@ -75,28 +75,29 @@ let veeCustomMessage = {
     }
 };
 
-let savingsObj = {
+let withdrawObj = {
     member_id: '',
     amount: '',
 };
 Vue.use(VeeValidate, {
     dictionary: veeCustomMessage,
-    fieldsBagName: savingsObj
+    fieldsBagName: withdrawObj
 });
+
 export default {
-    name: "DailySavingsCreate",
+    name: "Withdraw",
     components: {
         BasicSelect
     },
     data() {
         return {
-            savings: savingsObj,
             members: [],
             member: {
                 value: '',
                 text: ''
             },
-            savingsValidations: {
+            withdraw: withdrawObj,
+            withdrawValidation: {
                 amount: {
                     required: true,
                     numeric: true,
@@ -105,19 +106,18 @@ export default {
                 member_id: {
                     required: true
                 },
-            },
-            disabled: false,
+            }
         }
     },
     methods: {
         handleGetAllMember() {
-            axios.get(this.$env.BACKEND_API + 'admin/member/list/without/pagination')
+            axios.get(this.$env.BACKEND_API + 'admin/accounting/total/saving/member/list')
                 .then(res => {
                     let members = res.data;
                     members.forEach((member, index) => {
                         let memberObj = {};
-                        memberObj.value = member.id;
-                        memberObj.text = member.name + ' ' + member.member_id;
+                        memberObj.value = member.member.id;
+                        memberObj.text = member.member.name + ' ' + member.member.member_id;
                         this.members.push(memberObj);
                     })
                 })
@@ -128,55 +128,53 @@ export default {
         getError(fieldName) {
             return this.errors.first(fieldName)
         },
-        handleAddMemberDailySavings() {
-            this.disabled = true;
+        handleOnSelectMember(items) {
+            this.member = items;
+            this.withdraw.member_id = items.value;
+        },
+        handleResetSavingsWithdrawForm() {
+            this.member = {};
+            this.withdraw.member_id = '';
+            this.withdraw.amount = '';
+            this.$router.push({name: 'TotalSavingsList'});
+        },
+        cancel() {
+            this.handleResetSavingsWithdrawForm();
+        },
+        handleSavingsAmountWithdraw() {
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
-                    if (this.savings.member_id !== '') {
+                    if (this.withdraw.member_id !== '') {
                         let formData = new FormData();
-                        formData.append('member_id', this.savings.member_id);
-                        formData.append('amount', this.savings.amount);
-                        axios.post(this.$env.BACKEND_API + 'admin/accounting/daily/saving/add', formData)
+                        formData.append('member_id', this.withdraw.member_id);
+                        formData.append('amount', this.withdraw.amount);
+                        axios.post(this.$env.BACKEND_API + 'admin/accounting/total/saving/withdraw', formData)
                             .then(res => {
                                 if (res.data.status === 'validation' || res.data.status === 'failed') {
                                     this.$notification.error(this, 'Error', res.data.message);
                                 } else if (res.data.status === 'success') {
                                     this.$notification.notify(this, 'Success', res.data.message);
-                                    this.$router.push({name: 'DailySavingsList'});
-                                    this.handleResetMemberDailySavingsForm();
+                                    this.handleResetSavingsWithdrawForm();
                                 } else {
                                     this.$notification.error(this, 'Error', 'Somethings went wrong');
                                 }
                             })
                             .catch(err => {
                                 this.$notification.notifyError(this, err.response.data);
-                                this.disabled = false;
                             })
+
                     } else {
                         this.$notification.error(this, 'Error', 'প্রথমে একটি মেম্বার সিলেক্ট করুন');
                     }
                 }
-            });
-        },
-        handleOnSelectMember(items) {
-            this.member = items;
-            this.savings.member_id = items.value;
-        },
-        handleResetMemberDailySavingsForm() {
-            this.member = {};
-            this.savings.member_id = '';
-            this.savings.amount = '';
-        },
-        cancel() {
-            this.$router.push({name: 'DailySavingsList'});
-            this.handleResetMemberDailySavingsForm();
-        },
+            })
+        }
     },
     mounted() {
         this.handleGetAllMember();
     },
     computed: {
-        isError () {
+        isError() {
             return isEmpty(this.member.value)
         }
     },

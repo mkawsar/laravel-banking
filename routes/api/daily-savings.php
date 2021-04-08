@@ -12,4 +12,9 @@ Route::group([
     Route::get('daily/saving/list/search', 'DailySavingsController@search');
     Route::post('daily/saving/add', 'DailySavingsController@store');
     Route::delete('daily/saving/{savingID}/delete', 'DailySavingsController@destroy');
+
+
+    Route::get('total/saving/list', 'DailySavingsController@totalSavingsAmountList');
+    Route::get('total/saving/member/list', 'DailySavingsController@memberListTotalSavings');
+    Route::post('total/saving/withdraw', 'DailySavingsController@withdrawSavingsAmount');
 });
