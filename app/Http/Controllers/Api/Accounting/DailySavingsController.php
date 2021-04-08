@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Accounting;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accounting\DailySavings;
+use App\Models\Accounting\MemberTotalSavingsAmount;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +61,17 @@ class DailySavingsController extends Controller
         $saving->amount = $request->amount;
 
         if ($saving->save()) {
+            $member = MemberTotalSavingsAmount::where('member_id', '=', $request->member_id)->first();
+            if (empty($member)) {
+                $totalSavings = new MemberTotalSavingsAmount();
+                $totalSavings->id = Uuid::uuid4()->toString();
+                $totalSavings->member_id = $request->member_id;
+                $totalSavings->amount = $request->amount;
+                $totalSavings->save();
+            } else {
+                $amount = $member->amount + $request->amount;
+                MemberTotalSavingsAmount::where('id', '=', $member->id)->update(['amount' => $amount]);
+            }
             return response([
                 'message' => 'মেম্বারের দৈনিক সঞ্চয় যোগ করা হয়েছে।',
                 'status' => 'success'
