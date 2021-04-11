@@ -372,4 +372,146 @@ class DailySavingsController extends Controller
             ->orderBy('withdraw_date', 'desc')
             ->paginate(10);
     }
+
+    public function memberSavingsWithdrawDownload(Request $request, $memberID)
+    {
+        $member = Member::select('name')->where('id', '=', $memberID)->first();
+        $name = str_replace(' ', '_', $member->name) . '-মোট সঞ্চয়-' . Uuid::uuid4()->toString() . '.pdf';
+        $amounts = SavingAmountWithdraw::with('member.route')
+            ->where('member_id', '=', $memberID)
+            ->orderBy('withdraw_date', 'desc')
+            ->get();
+        $savingsAmount = DailySavings::where('member_id', '=', $memberID)->sum('amount');
+        $withdrawAmount = SavingAmountWithdraw::where('member_id', '=', $memberID)->sum('withdraw_amount');
+        $remainAmount = $savingsAmount - $withdrawAmount;
+
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $mpdf = new \Mpdf\Mpdf([
+            'fontDir' => array_merge($fontDirs, [
+                public_path() . '/assets/fonts',
+            ]),
+            'fontdata' => $fontData + [
+                    'kalpurush' => [
+                        'R' => 'kalpurush.ttf', // regular font
+                        'B' => 'kalpurush.ttf', // optional: bold font
+                        'I' => 'kalpurush.ttf', // optional: italic font
+                        'BI' => 'kalpurush.ttf', // optional: bold-italic font
+                        'useOTL' => 0xFF,
+                        'useKashida' => 75,
+                    ]
+                ],
+            'default_font' => 'kalpurush'
+        ]);
+
+        $html = '';
+        $html .= '<head><style>
+                        .table{
+                            border-left: thin solid;
+                            border-right: thin solid;
+                            border-bottom: thin solid #000000;
+                            border-top: thin solid;
+                        }
+
+                        .table{
+                            margin-top: 10px;
+                            margin-bottom: 10px;
+                            border-collapse: collapse;
+                        }
+
+                        table tr {
+                            border-bottom: 1px solid black;
+                        }
+
+                        table tr:last-child {
+                            border-bottom: none;
+                        }
+
+                        .Cell
+                        {
+
+                            width: 300px;
+                        }
+
+                        .firstCell
+                        {
+                            border-left: thin;
+                            border-right: thin solid;
+                            border-bottom: thin;
+                            border-top: thin;
+                        }
+
+                        .smallCell
+                        {
+                            width:150px;
+                        }
+
+                        .largeCell
+                        {
+                            width: 450px;
+                        }
+
+                        .row
+                        {
+                            display: block;
+                        }
+
+                        .koninklijkeLogo
+                        {
+                            width: 30px;
+                        }
+
+                        .maxSize
+                        {
+                            width: 600px;
+                        }
+                </style></head>';
+
+
+        $html .= '<body><h4 align="center" style="font-size: 18px;">' . $member->name . ' সঞ্চয় উত্তোলনের তালিকা</h4>';
+        $html .= '<table class="table" align="center">';
+        $html .= '
+                <tr class="row firstCell">
+                    <th class="smallCell firstCell">মোট সঞ্চয়</th>
+                    <th class="smallCell firstCell">মোট উত্তোলন</th>
+                    <th class="smallCell firstCell">অবশিষ্ট সঞ্চয়</th>
+                </tr>';
+        $html .= '
+                <tr class="row firstCell">
+                    <td class="smallCell firstCell" align="center">' . $savingsAmount . ' TK' . '</td>
+                    <td class="smallCell firstCell" align="center">' . $withdrawAmount . ' TK' . '</td>
+                    <td class="smallCell firstCell" align="center">' . $remainAmount . ' TK' . '</td>
+                </tr>';
+        $html .= '</table>';
+
+        $html .= '<table class="table" align="center">';
+        $html .= '
+                <tr class="row firstCell">
+                    <th class="smallCell firstCell">নাম</th>
+                    <th class="smallCell firstCell">মেম্বার নম্বর</th>
+                    <th class="smallCell firstCell">রুট নাম</th>
+                    <th class="smallCell firstCell">উত্তোলনের পরিমান</th>
+                    <th class="smallCell firstCell">উত্তোলনের তারিখ</th>
+                </tr>';
+        foreach ($amounts as $data) {
+            $html .= '
+                <tr class="row firstCell">
+                    <td class="smallCell firstCell" align="center">' . $data->member->name . '</td>
+                    <td class="smallCell firstCell" align="center">' . $data->member->member_id . '</td>
+                    <td class="smallCell firstCell" align="center">' . $data->member->route->name . '</td>
+                    <td class="smallCell firstCell" align="center">' . $data->withdraw_amount . ' TK' . '</td>
+                    <td class="smallCell firstCell" align="center">' . Carbon::parse($data->withdraw_date)->format('Y/m/d H:m:i') . '</td>
+                </tr>';
+        }
+        $html .= '</table>';
+        $html .= '</body></html>';
+
+        $mpdf->WriteHTML($html);
+//        $mpdf->Output();
+        $mpdf->Output($name, 'D');
+    }
 }

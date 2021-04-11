@@ -30,4 +30,5 @@ Route::group([
     'prefix' => 'admin/accounting'
 ], function () {
     Route::get('member/{memberID}/daily/savings/download', 'DailySavingsController@memberDailySavingsDownload');
+    Route::get('member/{memberID}/savings/withdraw/history/download', 'DailySavingsController@memberSavingsWithdrawDownload');
 });

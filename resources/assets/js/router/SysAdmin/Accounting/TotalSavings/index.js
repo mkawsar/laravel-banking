@@ -3,6 +3,7 @@ const TotalSavingsList = () => import('~/components/Dashboard/Views/SysAdmin/Acc
 const SavingsWithdraw = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/TotalSavings/Withdraw');
 
 const MemberDailySavingsList = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/MemberDetails/DailySavingsList');
+const SavingWithdrawHistory = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/MemberDetails/SavingWithdrawHistory');
 
 export default [
     {
@@ -29,12 +30,12 @@ export default [
                 component: MemberDailySavingsList,
                 meta: {title: 'দৈনিক সঞ্চয়ের তালিকা', requireAuth: true, roles: ['Admin']}
             },
-            // {
-            //     path: 'list/add',
-            //     name: 'DailySavingsCreate',
-            //     component: DailySavingsCreate,
-            //     meta: {title: 'দৈনিক সঞ্চয় যোগ', requireAuth: true, roles: ['Admin']}
-            // },
+            {
+                path: 'list/member/:memberID/savings/withdraw/history',
+                name: 'SavingWithdrawHistory',
+                component: SavingWithdrawHistory,
+                meta: {title: 'সঞ্চয় উত্তোলনের তালিকা', requireAuth: true, roles: ['Admin']}
+            }
         ]
     }
 ]
