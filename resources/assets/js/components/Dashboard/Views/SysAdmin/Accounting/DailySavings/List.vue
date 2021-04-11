@@ -126,6 +126,15 @@ export default {
                     dataClass: 'text-center',
                 },
                 {
+                    name: 'member.route',
+                    title: 'রুট নাম',
+                    callback: function (route) {
+                        return route.name;
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center'
+                },
+                {
                     name: 'amount',
                     title: 'জমা টাকা',
                     titleClass: 'text-center',

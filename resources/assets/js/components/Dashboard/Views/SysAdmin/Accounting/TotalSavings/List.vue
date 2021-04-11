@@ -52,6 +52,15 @@
                                             offset: 10,}">
                                     <i class="ti-close"></i>
                                 </button>
+                                <router-link :to="{name: 'MemberDailySavingsList', params: { memberID: props.rowData.member.id }}" class="btn btn-simple btn-xs btn-success btn-icon"
+                                        v-tooltip="{
+                                            content: 'Details',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                    <i class="ti-eye"></i>
+                                </router-link>
                             </template>
                         </vuetable>
                         <div class="vuetable-pagination ui basic segment grid">

@@ -17,4 +17,17 @@ Route::group([
     Route::get('total/saving/list', 'DailySavingsController@totalSavingsAmountList');
     Route::get('total/saving/member/list', 'DailySavingsController@memberListTotalSavings');
     Route::post('total/saving/withdraw', 'DailySavingsController@withdrawSavingsAmount');
+
+    Route::get('member/{memberID}/savings/details', 'DailySavingsController@memberSavingsDetails');
+    Route::get('member/{memberID}/daily/savings/list', 'DailySavingsController@memberDailySavingsList');
+    Route::get('member/{memberID}/savings/withdraw/list', 'DailySavingsController@memberSavingsWithdrawList');
+
+    Route::get('member/{memberID}/daily/savings/download', 'DailySavingsController@memberDailySavingsDownload');
+});
+
+Route::group([
+    'namespace' => 'Api\Accounting',
+    'prefix' => 'admin/accounting'
+], function () {
+    Route::get('member/{memberID}/daily/savings/download', 'DailySavingsController@memberDailySavingsDownload');
 });

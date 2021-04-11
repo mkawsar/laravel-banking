@@ -224,9 +224,6 @@ export default {
             this.url = this.$env.BACKEND_API + `admin/member/route/${this.$route.params.routeID}/search`;
         },
         handleDownload() {
-            console.log(this.$route.params.routeID)
-            // console.log(window.location.host + this.$env.BACKEND_API + `admin/member/route/${this.$route.params.routeID}/download`);
-            // window.open('http://www.google.com');
             window.location.href = this.$env.BACKEND_API + `admin/member/route/${this.$route.params.routeID}/download`;
         }
     },
