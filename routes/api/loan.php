@@ -9,4 +9,5 @@ Route::group([
 ], function () {
     Route::get('member/list', 'LoanManagementController@index');
     Route::post('member/add', 'LoanManagementController@storeMemberLoan');
+    Route::delete('{loanID}/member/delete', 'LoanManagementController@destroy');
 });

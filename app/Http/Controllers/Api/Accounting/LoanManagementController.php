@@ -76,4 +76,13 @@ class LoanManagementController extends Controller
             ]);
         }
     }
+
+    public function destroy($loanID)
+    {
+        if (MemberLoan::where('id', '=', $loanID)->delete()) {
+            return response(['message' => 'এই মেম্বার এর লোন মুছে ফেলা হয়েছে।', 'status' => 'success']);
+        } else {
+            return response(['message' => 'এই মেম্বার এর লোন মুছে ফেলা হয়নি।', 'status' => 'failed']);
+        }
+    }
 }

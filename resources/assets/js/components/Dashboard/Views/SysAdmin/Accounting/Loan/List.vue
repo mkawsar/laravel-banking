@@ -44,9 +44,9 @@
                             >
                                 <template slot="actions" slot-scope="props">
                                     <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
-                                            @click.prevent="handleMemberDailySavingsDelete(props.rowData.member.name, props.rowData.id)"
+                                            @click.prevent="handleDeleteMemberLoan(props.rowData.id)"
                                             v-tooltip="{
-                                            content: 'Delete this member daily savings',
+                                            content: 'Delete this member loan',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
@@ -72,10 +72,15 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import Vuetable from "vuetable-2/src/components/Vuetable";
 import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
 import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
 import VuetableCssConfig from "~/plugins/VuetableCssConfig";
+
+import {MessageBox} from 'element-ui';
+
+Vue.prototype.$confirm = MessageBox.confirm;
 export default {
     name: "MemberLoanList",
     data() {
@@ -207,6 +212,31 @@ export default {
             this.filterText = '';
             this.url = this.$env.BACKEND_API + `admin/accounting/loan/member/list`
         },
+        handleDeleteMemberLoan(loanID) {
+            this.$confirm('This will delete the loan". Continue?', 'Warning', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel',
+                type: 'warning'
+            }).then(() => {
+                axios.delete(this.$env.BACKEND_API + `admin/accounting/loan/${loanID}/member/delete `)
+                    .then(res => {
+                        if (res.data.status === 'failed') {
+                            this.$notification.error(this, 'Error', res.data.message);
+                        } else if (res.data.status === 'success') {
+                            this.$notification.notify(this, 'Success', res.data.message);
+                            this.$refs.vuetable.refresh();
+                        } else {
+                            this.$notification.error(this, 'Error', 'Somethings went wrong');
+                        }
+                    })
+                    .catch(err => {
+                        this.$notification.error(this, 'Error', err.response.data);
+                    })
+            })
+                .catch(() => {
+                    //this.$notification.error(this, 'Error', 'Somethings went wrong');
+                })
+        }
     },
     mounted() {
         this.handleInitialData();
