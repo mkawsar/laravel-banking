@@ -20,7 +20,7 @@ class HomeController extends Controller
             'status' => 'success',
             'members' => $members,
             'routes' => $routes,
-            'savings' => $savings
+            'savings' => round($savings, 2)
         ]);
     }
 }

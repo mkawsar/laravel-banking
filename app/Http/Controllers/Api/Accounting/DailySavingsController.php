@@ -118,7 +118,7 @@ class DailySavingsController extends Controller
 
     public function totalSavingsAmountList(Request $request)
     {
-        return MemberTotalSavingsAmount::with('member.route')
+        $members =  MemberTotalSavingsAmount::with('member.route')
             ->where(function ($q) {
                 $q->when(!empty(request('search')), function ($q) {
                     $q->whereHas('member', function ($q) {
@@ -129,6 +129,11 @@ class DailySavingsController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        foreach ($members as $member) {
+            $member->amount = round($member->amount, 2);
+        }
+
+        return $members;
     }
 
     public function memberListTotalSavings()

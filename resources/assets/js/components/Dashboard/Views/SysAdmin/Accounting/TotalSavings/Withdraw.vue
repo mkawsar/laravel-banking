@@ -136,10 +136,10 @@ export default {
             this.member = {};
             this.withdraw.member_id = '';
             this.withdraw.amount = '';
-            this.$router.push({name: 'TotalSavingsList'});
         },
         cancel() {
             this.handleResetSavingsWithdrawForm();
+            this.$router.push({name: 'TotalSavingsList'});
         },
         handleSavingsAmountWithdraw() {
             this.$validator.validateAll().then(isValid => {
@@ -155,6 +155,7 @@ export default {
                                 } else if (res.data.status === 'success') {
                                     this.$notification.notify(this, 'Success', res.data.message);
                                     this.handleResetSavingsWithdrawForm();
+                                    this.$router.push({name: 'TotalSavingsList'});
                                 } else {
                                     this.$notification.error(this, 'Error', 'Somethings went wrong');
                                 }
@@ -172,6 +173,7 @@ export default {
     },
     mounted() {
         this.handleGetAllMember();
+        this.handleResetSavingsWithdrawForm();
     },
     computed: {
         isError() {
