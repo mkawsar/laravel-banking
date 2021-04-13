@@ -35,5 +35,11 @@ export default [
         icon: 'fa fa-life-ring',
         path: '/admin/accounting/total/savings/list',
         meta: {requireAuth: true, roles: ['Admin']},
+    },
+    {
+        name: 'মেম্বার লোন লিস্ট',
+        icon: 'ti-reload',
+        path: '/admin/accounting/member/loan/list',
+        meta: {requireAuth: true, roles: ['Admin']},
     }
 ]

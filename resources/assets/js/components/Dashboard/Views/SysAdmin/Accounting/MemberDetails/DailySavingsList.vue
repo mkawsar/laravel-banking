@@ -238,7 +238,6 @@ export default {
             this.url = this.$env.BACKEND_API + `admin/accounting/member/${this.$route.params.memberID}/daily/savings/list`
         },
         handleMemberSavingsListDownload() {
-            console.log('est');
             window.location.href = this.$env.BACKEND_API + `admin/accounting/member/${this.$route.params.memberID}/daily/savings/download`;
         }
     },
