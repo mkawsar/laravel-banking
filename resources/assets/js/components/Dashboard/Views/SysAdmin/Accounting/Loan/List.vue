@@ -107,8 +107,7 @@ export default {
                     callback: function (member) {
                         return member.name;
                     },
-                    titleClass: 'text-center',
-                    dataClass: 'text-center',
+                    titleClass: 'text-center'
                 },
                 {
                     name: 'member',
@@ -116,8 +115,7 @@ export default {
                     callback: function (member) {
                         return member.member_id;
                     },
-                    titleClass: 'text-center',
-                    dataClass: 'text-center',
+                    titleClass: 'text-center'
                 },
                 {
                     name: 'member.route',
@@ -129,17 +127,8 @@ export default {
                     dataClass: 'text-center'
                 },
                 {
-                    name: 'creator',
-                    title: 'লোন দাতা',
-                    callback: function (creator) {
-                        return creator.name;
-                    },
-                    titleClass: 'text-center',
-                    dataClass: 'text-center'
-                },
-                {
                     name: 'loan_amount',
-                    title: 'লোনের পরিমানা',
+                    title: 'লোনের পরিমান',
                     callback: function (amount) {
                         return amount + ' TK';
                     },
@@ -176,6 +165,30 @@ export default {
                     callback: function (amount) {
                         return amount + ' TK';
                     },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center'
+                },
+                {
+                    name: 'paid_amount',
+                    title: 'পরিশোধ',
+                    callback: function (amount) {
+                        return amount + ' TK';
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center'
+                },
+                {
+                    name: 'due_amount',
+                    title: 'বকেয়া লোন',
+                    callback: function (amount) {
+                        return amount + ' TK';
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center'
+                },
+                {
+                    name: 'due_installment',
+                    title: 'বাকি কিস্তি',
                     titleClass: 'text-center',
                     dataClass: 'text-center'
                 },
