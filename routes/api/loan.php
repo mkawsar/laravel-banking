@@ -12,4 +12,5 @@ Route::group([
     Route::delete('{loanID}/member/delete', 'LoanManagementController@destroy');
     Route::get('{loanID}/details', 'LoanManagementController@details');
     Route::post('{loanID}/store/payment', 'LoanManagementController@memberStoreLoanPayment');
+    Route::get('{loanID}/{memberID}/payment/list', 'LoanManagementController@loanPaymentList');
 });

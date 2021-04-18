@@ -185,4 +185,13 @@ class LoanManagementController extends Controller
             ]);
         }
     }
+
+    public function loanPaymentList($loanID, $memberID)
+    {
+        return MemberLoanPayment::with('member.route', 'creator')
+            ->where('loan_id', '=', $loanID)
+            ->where('member_id', '=', $memberID)
+            ->orderBy('payment_date', 'desc')
+            ->paginate(10);
+    }
 }

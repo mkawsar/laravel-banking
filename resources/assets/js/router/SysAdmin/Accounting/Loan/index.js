@@ -2,6 +2,8 @@ const DashboardLayout = () => import('~/components/Dashboard/Layout/DashboardLay
 const MemberLoanList = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/Loan/List');
 const MemberLoanAdd = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/Loan/Add');
 
+const MemberLoanPaymentList = () => import('~/components/Dashboard/Views/SysAdmin/Accounting/Loan/Payment/List');
+
 export default [
     {
         path: '/admin/accounting/member/loan/',
@@ -19,6 +21,12 @@ export default [
                 name: 'MemberLoanAdd',
                 component: MemberLoanAdd,
                 meta: {title: 'লোন প্রদান', requireAuth: true, roles: ['Admin']}
+            },
+            {
+                path: 'list/:loanID/member/:memberID/payment/list',
+                name: 'MemberLoanPaymentList',
+                component: MemberLoanPaymentList,
+                meta: {title: 'লোন প্রদান লিস্ট', requireAuth: true, roles: ['Admin']}
             },
         ]
     }

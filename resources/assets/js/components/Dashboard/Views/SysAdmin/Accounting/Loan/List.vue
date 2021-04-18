@@ -53,6 +53,16 @@
                                             offset: 10,}">
                                         <i class="ti-close"></i>
                                     </button>
+                                    <router-link :to="{name: 'MemberLoanPaymentList', params: { loanID: props.rowData.id, memberID: props.rowData.member_id }}"
+                                        class="btn btn-simple btn-xs btn-success btn-icon remove"
+                                            v-tooltip="{
+                                            content: 'Payment list',
+                                            placement: 'top-center',
+                                            classes: ['info'],
+                                            targetClasses: ['it-has-a-tooltip'],
+                                            offset: 10,}">
+                                        <i class="ti-eye"></i>
+                                    </router-link>
                                 </template>
                             </vuetable>
                             <div class="vuetable-pagination ui basic segment grid">
