@@ -5,40 +5,41 @@
                 <li class="breadcrumb-item">
                     <router-link :to="{name: 'Overview'}">হোম</router-link>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">মেম্বার রুট লিস্ট</li>
+                <li class="breadcrumb-item active" aria-current="page">লিস্ট</li>
             </ol>
         </nav>
         <div class="col-md-12 card">
-            <form autocomplete="off">
-                <div class="card-header">
-                    <h4 class="card-title">
-                        Enter Member Route Details Below
-                    </h4>
-                </div>
-                <div class="card-content">
-                    <div class="form-group required">
-                        <label for="name" class="control-label">মেম্বার রুট নাম</label>
-                        <input type="text"
-                               name="name"
-                               id="name"
-                               v-validate="routeValidations.name"
-                               v-model="route.name"
-                               placeholder="মেম্বার রুট নাম"
-                               class="form-control">
-                        <span class="text-danger" v-show="errors.has('name')">{{ errors.first('name') }}</span>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" @click.prevent="handleCreateNewMemberRoute"
-                            class="btn btn-outline btn-info btn-wd">সাবমিট
-                    </button>
-                </div>
-            </form>
-        </div>
-        <div class="col-md-12 card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <router-link :to="{name: 'DailySavingsCreate'}" class="btn btn-outline btn-success">
+                        দৈনিক সঞ্চয় যোগ
+                    </router-link>
+                </h4>
+            </div>
             <div class="card-content row">
                 <div class="col-sm-12">
                     <template>
+                        <div class="filter-bar" style="margin-bottom: 10px">
+                            <form class="form-inline" @submit.prevent="doFilter">
+                                <div class="row">
+                                    <div class="col-xs-5">
+                                        <input type="text"
+                                               v-model="filterText"
+                                               class="form-control" placeholder="Name or Member ID">
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <datepicker
+                                            :format="format"
+                                            v-model="filterDate"
+                                            input-class="form-control"/>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <button class="btn btn-primary btn-sm">Go</button>
+                                        <button class="btn btn-default btn-sm" @click.prevent="resetFilter">Reset</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                         <vuetable ref="vuetable"
                                   :api-url="url"
                                   :http-options="headerOptions"
@@ -51,19 +52,15 @@
                         >
                             <template slot="actions" slot-scope="props">
                                 <button class="btn btn-simple btn-xs btn-danger btn-icon remove"
-                                        @click.prevent="handleDeleteRoute(props.rowData)"
+                                        @click.prevent="handleMemberDailySavingsDelete(props.rowData.member.name, props.rowData.id)"
                                         v-tooltip="{
-                                            content: 'Delete this member route',
+                                            content: 'Delete this member daily savings',
                                             placement: 'top-center',
                                             classes: ['info'],
                                             targetClasses: ['it-has-a-tooltip'],
                                             offset: 10,}">
                                     <i class="ti-close"></i>
                                 </button>
-                                <router-link :to="{name: 'MemberRouteDetails', params: { routeID: props.rowData.id }}"
-                                             class="btn btn-simple btn-xs btn-success btn-icon remove">
-                                    <i class="ti-eye"></i>
-                                </router-link>
                             </template>
                         </vuetable>
                         <div class="vuetable-pagination ui basic segment grid">
@@ -82,64 +79,76 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import VeeValidate from 'vee-validate'
+import Vue from 'vue';
 import Vuetable from "vuetable-2/src/components/Vuetable";
 import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
 import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
 import VuetableCssConfig from "~/plugins/VuetableCssConfig";
+import Datepicker from "vuejs-datepicker/dist/vuejs-datepicker.esm.js";
 
 import {MessageBox} from 'element-ui';
 
 Vue.prototype.$confirm = MessageBox.confirm;
 
-let veeCustomMessage = {
-    en: {
-        custom: {
-            name: {
-                required: 'Full member route name field is required',
-            },
-        }
-    }
-};
-
-let routeObj = {
-    name: ''
-};
-
-Vue.use(VeeValidate, {
-    dictionary: veeCustomMessage,
-    fieldsBagName: routeObj
-});
 export default {
-    name: "List",
+    name: "DailySavingList",
+    components: {
+        Vuetable,
+        VuetablePagination,
+        VuetablePaginationInfo,
+        datepicker: Datepicker
+    },
     data() {
         return {
-            route: routeObj,
-            routeValidations: {
-                name: {
-                    required: true
-                },
-            },
-            url: this.$env.BACKEND_API + 'admin/member/route/list',
+            url: this.$env.BACKEND_API + 'admin/accounting/daily/saving/list',
             css: VuetableCssConfig,
             filterText: '',
+            filterDate: '',
             moreParams: {},
+            format: 'yyyy-MM-dd',
             tableRowsFields: [
                 {
-                    name: 'name',
-                    title: 'নাম'
+                    name: 'member',
+                    title: 'নাম',
+                    callback: function (member) {
+                        return member.name;
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
                 },
                 {
-                    name: 'creator',
-                    title: 'ক্রিয়েটর',
-                    callback: function (user) {
-                        return user.name
-                    }
+                    name: 'member',
+                    title: 'মেম্বার আইডি',
+                    callback: function (member) {
+                        return member.member_id;
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
+                },
+                {
+                    name: 'member.route',
+                    title: 'রুট নাম',
+                    callback: function (route) {
+                        return route.name;
+                    },
+                    titleClass: 'text-center',
+                    dataClass: 'text-center'
+                },
+                {
+                    name: 'amount',
+                    title: 'জমা টাকা',
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
+                },
+                {
+                    name: 'saving_date',
+                    title: 'জমাদানের তারিখ',
+                    titleClass: 'text-center',
+                    dataClass: 'text-center',
                 },
                 {
                     name: '__slot:actions',
-                    title: 'অ্যাকশন',
+                    title: 'Actions',
                     titleClass: 'text-center',
                     dataClass: 'text-center',
                 }
@@ -147,38 +156,7 @@ export default {
             headerOptions: {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}},
         }
     },
-    components: {
-        Vuetable,
-        VuetablePagination,
-        VuetablePaginationInfo,
-    },
     methods: {
-        handleCreateNewMemberRoute() {
-            this.$validator.validateAll().then(isValid => {
-                if (isValid) {
-                    let formData = new FormData();
-                    formData.append('name', this.route.name);
-                    axios.post(this.$env.BACKEND_API + 'admin/member/route/create', formData)
-                        .then(res => {
-                            if (res.data.status === 'validation' || res.data.status === 'failed') {
-                                this.$notification.error(this, 'Error', res.data.message);
-                            } else if (res.data.status === 'success') {
-                                this.$notification.notify(this, 'Success', res.data.message);
-                                Vue.nextTick(() => this.$refs.vuetable.refresh())
-                                this.route.name = '';
-                            } else {
-                                this.$notification.error(this, 'Error', 'Somethings went wrong');
-                            }
-                        })
-                        .catch(err => {
-                            this.$notification.notifyError(this, err.response.data);
-                        })
-                }
-            });
-        },
-        getError(fieldName) {
-            return this.errors.first(fieldName)
-        },
         onPaginationData(paginationData) {
             this.$refs.pagination.setPaginationData(paginationData);
             this.$refs.paginationInfo.setPaginationData(paginationData)
@@ -203,23 +181,28 @@ export default {
             Vue.nextTick(() => this.$refs.vuetable.refresh())
         },
         doFilter() {
-            if (this.filterText === '') {
-                this.url = this.$env.BACKEND_API + 'admin/member/list';
+            if (this.filterText === '' && this.filterDate === '') {
+                this.url = this.$env.BACKEND_API + 'admin/accounting/daily/saving/list';
             } else {
-                this.url = this.$env.BACKEND_API + `admin/member/search?search=${this.filterText}`;
+                let date = '';
+                if (this.filterDate !== '') {
+                    date = this.$moment(this.filterDate).format('Y-MM-DD H:m:s');
+                }
+                this.url = this.$env.BACKEND_API + `admin/accounting/daily/saving/list/search?search=${this.filterText}&date=${date}`;
             }
         },
         resetFilter() {
             this.filterText = '';
-            this.url = this.$env.BACKEND_API + 'admin/member/list'
+            this.filterDate = '';
+            this.url = this.$env.BACKEND_API + 'admin/accounting/daily/saving/list'
         },
-        handleDeleteRoute(route) {
-            this.$confirm('This will delete the user "' + route.name + '". Continue?', 'Warning', {
+        handleMemberDailySavingsDelete(name, savingsID) {
+            this.$confirm('This will delete the user "' + name + '". Continue?', 'Warning', {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Cancel',
                 type: 'warning'
             }).then(() => {
-                axios.delete(this.$env.BACKEND_API + `admin/member/route/${route.id}/delete`)
+                axios.delete(this.$env.BACKEND_API + `admin/accounting/daily/saving/${savingsID}/delete`)
                     .then(res => {
                         if (res.data.status === 'failed') {
                             this.$notification.error(this, 'Error', res.data.message);

@@ -26,6 +26,12 @@ class MembersController extends Controller
         return $members;
     }
 
+    // Member list without pagination
+    public function list()
+    {
+        return Member::all();
+    }
+
     public function create(Request $request)
     {
         $memberID = '00' . Carbon::now()->year . $request->member_id;
@@ -208,9 +214,16 @@ class MembersController extends Controller
     {
         $query = strtolower($request->search);
 
-        $members = Member::with('creator')->where('name', 'LIKE', '%' . $query . '%')
+        $members = Member::with('creator', 'route')
+            ->where('name', 'LIKE', '%' . $query . '%')
             ->orWhere('member_id', 'LIKE', '%' . $query . '%')
             ->paginate(10);
+        foreach ($members as $member) {
+            if ($member->picture != null) {
+                $member->picture = config('constant.app.url') . 'images/members/thumb/thumb_200x200_' . $member->picture;
+            }
+        }
+
         return $members;
     }
 
