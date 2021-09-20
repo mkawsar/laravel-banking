@@ -132,6 +132,65 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-4 col-sm-6">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <div class="col-xs-5">
+                                <div class="icon-big icon-warning text-center">
+                                    <i class="fa fa-money"></i>
+                                </div>
+                            </div>
+                            <div class="col-xs-7">
+                                <div class="numbers">
+                                    <p>মোট সঞ্চয়</p>
+                                    {{ savingsAmount.savings_amount + ' TK' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <div class="col-xs-5">
+                                <div class="icon-big icon-danger text-center">
+                                    <i class="fa fa-money"></i>
+                                </div>
+                            </div>
+                            <div class="col-xs-7">
+                                <div class="numbers">
+                                    <p>মোট উত্তোলন</p>
+                                    {{ savingsAmount.withdraw_amount + ' TK' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <div class="col-xs-5">
+                                <div class="icon-big icon-success text-center">
+                                    <i class="fa fa-money"></i>
+                                </div>
+                            </div>
+                            <div class="col-xs-7">
+                                <div class="numbers">
+                                    <p>অবশিষ্ট সঞ্চয়</p>
+                                    {{ savingsAmount.remain_amount + ' TK' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row" v-if="savingFormShowStatus">
             <div class="col-md-12 card">
@@ -333,6 +392,11 @@ export default {
             paid_amount: 0,
             due_amount: 0,
             due_installment: 0,
+            savingsAmount: {
+                savings_amount: 0,
+                withdraw_amount: 0,
+                remain_amount: 0
+            },
             savingFormShowStatus: false,
             savings: savingsObj,
             savingsValidations: {
@@ -354,6 +418,9 @@ export default {
                     this.paid_amount = response.paid_amount;
                     this.due_amount = response.due_amount;
                     this.due_installment = response.due_installment;
+                    this.savingsAmount.savings_amount = response.savings_amount;
+                    this.savingsAmount.withdraw_amount = response.withdraw_amount;
+                    this.savingsAmount.remain_amount = response.remain_amount;
                 })
                 .catch(err => {
                     this.$notification.error(this, 'Error', err.response.data);

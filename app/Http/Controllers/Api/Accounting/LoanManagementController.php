@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\Accounting;
 
 use App\Http\Controllers\Controller;
+use App\Models\Accounting\DailySavings;
 use App\Models\Accounting\MemberLoan;
 use App\Models\Accounting\MemberLoanPayment;
+use App\Models\Accounting\SavingAmountWithdraw;
 use App\Models\Settings\MemberInterestSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,6 +112,12 @@ class LoanManagementController extends Controller
         $paidInstallment = 0;
 
         $installment = MemberLoanPayment::where('loan_id', '=', $loanID)->orderBy('created_at', 'desc')->first();
+        $memberID = $loan->member->id;
+
+        $savingsAmount = DailySavings::where('member_id', '=', $memberID)->sum('amount');
+
+        $withdrawAmount = SavingAmountWithdraw::where('member_id', '=', $memberID)->sum('withdraw_amount');
+        $remainAmount = $savingsAmount - $withdrawAmount;
         if (!empty($installment)) {
             $paidInstallment = $installment->installment_count;
         }
@@ -120,7 +128,10 @@ class LoanManagementController extends Controller
             'paid_amount' => $paidAmount,
             'due_amount' => $dueAmount,
             'due_installment' => config('constant.loan.installment') - $paidInstallment,
-            'paid_installment' => $paidInstallment
+            'paid_installment' => $paidInstallment,
+            'savings_amount' => $savingsAmount,
+            'withdraw_amount' => $withdrawAmount,
+            'remain_amount' => $remainAmount
         ], 200);
     }
 
