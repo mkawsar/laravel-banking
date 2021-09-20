@@ -222,12 +222,43 @@
             </div>
         </div>
 
+        <div class="row" v-if="payLoanFormShowStatus">
+            <div class="col-md-12 card">
+                <form autocomplete="off">
+                    <div class="card-content">
+                        <div class="form-group required">
+                            <label for="pay_loan_amount" class="control-label">Amount</label>
+                            <input type="text"
+                                   name="pay_loan_amount"
+                                   id="pay_loan_amount"
+                                   v-model="payLoan.pay_loan_amount"
+                                   v-validate="payLoanValidations.pay_loan_amount"
+                                   :placeholder="`আপনার প্রতিদিনের কিস্তির পরিমান ${loan.installment_amount} টাকা`"
+                                   class="form-control">
+                            <span class="text-danger" v-show="errors.has('pay_loan_amount')">
+                                {{ errors.first('pay_loan_amount') }}
+                             </span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" @click.prevent="handleAddMemberDailyPayLoan"
+                                class="btn btn-outline btn-info btn-wd">দৈনিক লোন যোগ
+                        </button>
+                        <button type="submit" @click.prevent="payLoanFormShowStatus = !payLoanFormShowStatus"
+                                class="btn btn-outline btn-danger btn-wd"
+                                style="margin-left: 15px">বাতিল
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-12 card">
                 <div class="card-header">
                     <h4 class="card-title">
                         <button class="btn btn-outline btn-success"
-                                @click.prevent="handleSubmitPaymentLoanInstallment(loan)">
+                                @click="payLoanFormShowStatus = !payLoanFormShowStatus">
                             দৈনিক কিস্তি
                         </button>
                         <button class="btn btn-outline btn-success"
@@ -298,6 +329,12 @@ let veeCustomMessage = {
                 numeric: 'Savings amount field must be numeric number',
                 min: 'Savings amount field must be at least 2 number',
             },
+            pay_loan_amount: {
+                required: 'Loan amount field is required',
+                numeric: 'Loan amount field must be numeric number',
+                min: 'Loan amount field must be at least 2 number',
+            },
+
         }
     }
 };
@@ -406,6 +443,17 @@ export default {
                     min: 2
                 }
             },
+            payLoanValidations: {
+                pay_loan_amount: {
+                    required: true,
+                    numeric: true,
+                    min: 2
+                }
+            },
+            payLoan: {
+                pay_loan_amount: ''
+            },
+            payLoanFormShowStatus: false
         }
     },
     methods: {
@@ -439,33 +487,30 @@ export default {
         hideLoader() {
             this.loading = false;
         },
-        handleSubmitPaymentLoanInstallment(loan) {
-            this.$confirm('আপনি আপনার দৈনিক "' + loan.installment_amount + '" টাকা কিস্তি দিচ্ছেন. রাজি?', 'Warning', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Cancel',
-                type: 'warning'
-            }).then(() => {
-                let formData = new FormData();
-                formData.append('amount', loan.installment_amount);
-                axios.post(this.$env.BACKEND_API + `admin/accounting/loan/${loan.id}/store/payment`, formData)
-                    .then(res => {
-                        if (res.data.status === 'validation' || res.data.status === 'failed') {
-                            this.$notification.error(this, 'Error', res.data.message);
-                        } else if (res.data.status === 'success') {
-                            this.$notification.notify(this, 'Success', res.data.message);
-                            this.$refs.vuetable.refresh();
-                            this.handleInitialData();
-                        } else {
-                            this.$notification.error(this, 'Error', 'Somethings went wrong');
-                        }
-                    })
-                    .catch(err => {
-                        this.$notification.notifyError(this, err.response.data);
-                    })
+        handleAddMemberDailyPayLoan() {
+            this.$validator.validateAll().then(isValid => {
+                if (isValid) {
+                    let formData = new FormData();
+                    formData.append('amount', this.payLoan.pay_loan_amount);
+                    axios.post(this.$env.BACKEND_API + `admin/accounting/loan/${this.$route.params.loanID}/store/payment`, formData)
+                        .then(res => {
+                            if (res.data.status === 'validation' || res.data.status === 'failed') {
+                                this.$notification.error(this, 'Error', res.data.message);
+                            } else if (res.data.status === 'success') {
+                                this.$notification.notify(this, 'Success', res.data.message);
+                                this.$refs.vuetable.refresh();
+                                this.handleInitialData();
+                                this.payLoanFormShowStatus = !this.payLoanFormShowStatus;
+                                this.payLoan.pay_loan_amount = '';
+                            } else {
+                                this.$notification.error(this, 'Error', 'Somethings went wrong');
+                            }
+                        })
+                        .catch(err => {
+                            this.$notification.notifyError(this, err.response.data);
+                        })
+                }
             })
-                .catch(() => {
-
-                })
         },
         handleAddMemberDailySavings() {
             this.$validator.validateAll().then(isValid => {

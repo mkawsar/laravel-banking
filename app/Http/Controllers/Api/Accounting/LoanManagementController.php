@@ -149,28 +149,22 @@ class LoanManagementController extends Controller
         }
 
         $loan = MemberLoan::find($loanID);
-        if ($loan->installment_amount !== $request->amount) {
-            return response([
-                'message' => 'আপনার আজকের কিস্তি ' . $loan->installment_amount . ' টাকা, কিন্তু আপনি এই টাকার কম টাকা দিয়েছেন, তাই সমপরিমান টাকা দিন',
-                'status' => 'validation'
-            ]);
-        }
 
         $paymentCount = 1;
 
-        $loanPayment = MemberLoanPayment::where('loan_id', '=', $loanID)->orderBy('created_at', 'desc')->first();
+        $loanPayment = MemberLoanPayment::where('loan_id', '=', $loanID)->sum('payment_amount');
+        $paidLoanAmount = MemberLoanPayment::select('installment_count')->where('loan_id', '=', $loanID)->orderBy('created_at', 'desc')->first();
 
-        if (!empty($loanPayment)) {
-            $paymentCount = $loanPayment->installment_count + 1;
+        if ($loanPayment > 0) {
 
-            if (config('constant.loan.installment') == $loanPayment->installment_count) {
+            if ($loanPayment == $loan->loan_amount) {
                 return response([
                     'message' => 'আপনার সম্পূর্ণ লোন পরিশোধ হয়েছে।',
                     'status' => 'success'
                 ]);
             }
+            $paymentCount = $paidLoanAmount->installment_count + 1;
         }
-
 
         $dt = new \DateTime();
         $now = $dt->format('Y-m-d H:i:s');
