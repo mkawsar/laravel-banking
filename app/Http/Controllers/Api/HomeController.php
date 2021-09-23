@@ -18,16 +18,16 @@ class HomeController extends Controller
         $today = Carbon::today();
         $members = Member::count();
         $routes = MemberRoute::count();
-        $savings = MemberTotalSavingsAmount::sum('amount');
-        $totalLoan = MemberLoan::sum('loan_amount');
-        $totalLoanPayment = MemberLoanPayment::sum('payment_amount');
-        $yearlyLoan = MemberLoan::whereYear('created_at', $today)->sum('loan_amount');
-        $yearlyLoanInterest = MemberLoan::whereYear('created_at', $today)->sum('interest_amount');
-        $monthlyLoan = MemberLoan::whereMonth('created_at', $today)->sum('loan_amount');
-        $monthlyLoanInterest = MemberLoan::whereMonth('created_at', $today)->sum('loan_amount');
-        $monthlyLoanPayment = MemberLoanPayment::whereMonth('payment_date', $today)->sum('payment_amount');
+        $savings = floor(MemberTotalSavingsAmount::sum('amount'));
+        $totalLoan = floor(MemberLoan::sum('loan_amount'));
+        $totalLoanPayment = floor(MemberLoanPayment::sum('payment_amount'));
+        $yearlyLoan = floor(MemberLoan::whereYear('created_at', $today)->sum('loan_amount'));
+        $yearlyLoanInterest = floor(MemberLoan::whereYear('created_at', $today)->sum('interest_amount'));
+        $monthlyLoan = floor(MemberLoan::whereMonth('created_at', $today)->sum('loan_amount'));
+        $monthlyLoanInterest = floor(MemberLoan::whereMonth('created_at', $today)->sum('interest_amount'));
+        $monthlyLoanPayment = floor(MemberLoanPayment::whereMonth('payment_date', $today)->sum('payment_amount'));
 
-        $remainingLoanAmount = $totalLoan - $totalLoanPayment;
+        $remainingLoanAmount = floor($totalLoan - $totalLoanPayment);
 
         return response()->json([
             'status' => 'success',
